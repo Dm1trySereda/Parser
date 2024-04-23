@@ -1,4 +1,4 @@
-import requests, json, time
+import requests, json
 
 from bs4 import BeautifulSoup
 from celery import Celery, group, chain
@@ -49,33 +49,23 @@ def reading_pages(page):
 
 
 @parser.task()
-def first_part_pages(start, end):
-    result = []
-    for i in range(start, end):
-        result.append(reading_pages(i))
-    return result
-
-
-@parser.task()
-def second_part_pages(start, end):
-    result = []
-    for i in range(start, end):
-        result.append(reading_pages(i))
+def first_part_pages(page):
+    result = reading_pages(page)
     return result
 
 
 @parser.task()
 def write_to_json(result_pages):
-    with open('read_page.json', 'a') as file:
+    with open('read_page.json', 'w') as file:
         json.dump(result_pages, file, indent=4, ensure_ascii=False)
-        file.write('\n')
+        file.write('/n')
 
 
 def main():
-    result1 = first_part_pages.delay(1, 6).get()
-    result2 = second_part_pages.delay(6, 11).get()
-    combined_result = result1 + result2
-    write_to_json.apply_async(args=[combined_result])
+    tasks_group = group(first_part_pages.s(i) for i in range(1, 11))
+    tasks_chain = chain(tasks_group, write_to_json.s())
+    result = tasks_chain.delay()
+    result.get()
 
 
 if __name__ == '__main__':

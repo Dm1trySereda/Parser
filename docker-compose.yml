@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  redis:
+    image: redis
+    container_name: redis
+  celery:
+    image: celery
+    container_name: celery
+
