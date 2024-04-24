@@ -1,7 +1,7 @@
 import json
 import time
-import requests
-import asyncio, aiohttp
+import asyncio
+import aiohttp
 from bs4 import BeautifulSoup
 
 start = time.time()

@@ -1,7 +1,8 @@
-import requests, json
 import os
-from bs4 import BeautifulSoup
+import requests
 from celery import Celery, group, chain
+from bs4 import BeautifulSoup
+from mysql.connector import connect
 
 # Main name дается такой же как и название файла, иначе необходимо указывать рядом с каждой таской ее имя в виде (name="task_name")
 broker_url = os.getenv('BROKER_URL')
@@ -12,6 +13,14 @@ parser = Celery(
     backend=backend_url,
     include=['celery_main'],
 
+)
+user_password = os.getenv('MYSQL_ROOT_PASSWORD')
+name_db = os.getenv('MYSQL_DATABASE')
+db_connection = connect(
+    host="db_mysql",
+    user='root',
+    password='12345',
+    database='library'
 )
 
 
@@ -43,8 +52,8 @@ def reading_pages(page):
         book_data = {
             'Название книги': book_title,
             'Автор': book_author,
-            'Цена': book_price.text.replace('\xa0', '') if book_price else 'Цена не указана',
-            'Рейтинг': book_rating.text if book_rating else 'Рейтинг не указан',
+            'Цена': book_price.text.replace('\xa0', '') if book_price else 0,
+            'Рейтинг': book_rating.text if book_rating else 0,
         }
         library.append(book_data)
     all_books_in_page = {f"Страница {page}": library}
@@ -52,27 +61,59 @@ def reading_pages(page):
 
 
 @parser.task()
-def write_to_json(result_pages):
-    with open('read_page.json', 'w') as file:
-        json.dump(result_pages, file, indent=4, ensure_ascii=False)
+def create_table():
+    db_cursor = db_connection.cursor()
+
+    db_cursor.execute("SHOW TABLES LIKE 'anybooks'")
+    result = db_cursor.fetchone()
+
+    # Если таблица books не существует, создаем ее
+    if not result:
+        db_cursor.execute("""
+                CREATE TABLE anybooks (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    page VARCHAR(255),
+                    title VARCHAR(255),
+                    author VARCHAR(255),
+                    price VARCHAR(255),
+                    rating VARCHAR(255)
+                )
+            """)
+
+    db_cursor.close()
+
+
+@parser.task()
+def write_to_db(result_pages):
+    db_cursor = db_connection.cursor()
+
+    for item in result_pages:
+        for key, value in item.items():
+            for book in value:
+                title = book['Название книги']
+                author = book['Автор']
+                price = book['Цена']
+                rating = book['Рейтинг']
+                query = """
+                        INSERT INTO anybooks (page, title, author, price, rating)
+                        VALUES (%s, %s, %s, %s, %s)
+                    """
+                values = [
+                    (key, title, author, price, rating),
+                ]
+                db_cursor.executemany(query, values)
+
+    db_cursor.close()
+    db_connection.commit()
 
 
 def main():
+    create_table.delay()
     tasks_group = group(reading_pages.s(i) for i in range(1, 11))
-    tasks_chain = chain(tasks_group, write_to_json.s())
+    tasks_chain = chain(tasks_group, write_to_db.s())
     result = tasks_chain.delay()
     result.get()
 
 
-#
-#
 if __name__ == '__main__':
     main()
-# for i in range(1,2):
-#     result = reading_pages(i)
-#     for book in result[f'Страница {i}']:
-#         title = book['Название книги']
-#         author = book['Автор']
-#         price = book['Цена']
-#         rating = book['Рейтинг']
-#         print(f'Название книги: {title} -- Автор: {author} -- Цена : {price} -- Рейтинг: {rating}')
