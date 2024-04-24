@@ -1,10 +1,28 @@
 version: '3'
-
 services:
   redis:
-    image: redis
-    container_name: redis
+    image: 'redis:alpine'
+    ports:
+      - '6379:6379'
+  rabbitmq:
+    image: 'rabbitmq:3-management-alpine'
+    #    environment:
+    #      - RABBITMQ_DEFAULT_USER=s1nshyrika
+    #      - RABBITMQ_DEFAULT_PASS=default
+    ports:
+      - '5672:5672'
+      - '15672:15672'
   celery:
-    image: celery
-    container_name: celery
-
+    build: .
+    environment:
+      - BROKER_URL=amqp://rabbitmq:5672//
+      - RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - rabbitmq
+      - redis
+    links:
+      - rabbitmq
+      - redis
+    volumes:
+      - /media/dima-sereda/Новый том/Trainee/parser:/myapp
+    container_name: parser
