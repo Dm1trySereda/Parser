@@ -14,13 +14,16 @@ parser = Celery(
     include=['celery_main'],
 
 )
-user_password = os.getenv('MYSQL_ROOT_PASSWORD')
-name_db = os.getenv('MYSQL_DATABASE')
+
+user_name = os.getenv('MYSQL_USER')
+user_password = os.getenv('MYSQL_PASSWORD')
+db_name = os.getenv('MYSQL_DATABASE')
+
 db_connection = connect(
     host="db_mysql",
     user='root',
     password='12345',
-    database='library'
+    database='library',
 )
 
 
@@ -52,8 +55,8 @@ def reading_pages(page):
         book_data = {
             'Название книги': book_title,
             'Автор': book_author,
-            'Цена': book_price.text.replace('\xa0', '') if book_price else 0,
-            'Рейтинг': book_rating.text if book_rating else 0,
+            'Цена': book_price.text.replace('\xa0', '').rstrip('р.').replace(',', '.') if book_price else None,
+            'Рейтинг': book_rating.text.replace(',', '.') if book_rating else None,
         }
         library.append(book_data)
     all_books_in_page = {f"Страница {page}": library}
@@ -64,19 +67,19 @@ def reading_pages(page):
 def create_table():
     db_cursor = db_connection.cursor()
 
-    db_cursor.execute("SHOW TABLES LIKE 'anybooks'")
+    db_cursor.execute("SHOW TABLES LIKE 'books'")
     result = db_cursor.fetchone()
 
     # Если таблица books не существует, создаем ее
     if not result:
         db_cursor.execute("""
-                CREATE TABLE anybooks (
+                CREATE TABLE books (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     page VARCHAR(255),
                     title VARCHAR(255),
                     author VARCHAR(255),
-                    price VARCHAR(255),
-                    rating VARCHAR(255)
+                    price DECIMAL(10,2),
+                    rating DECIMAL(4,2)
                 )
             """)
 
@@ -95,7 +98,7 @@ def write_to_db(result_pages):
                 price = book['Цена']
                 rating = book['Рейтинг']
                 query = """
-                        INSERT INTO anybooks (page, title, author, price, rating)
+                        INSERT INTO books (page, title, author, price, rating)
                         VALUES (%s, %s, %s, %s, %s)
                     """
                 values = [
@@ -108,9 +111,9 @@ def write_to_db(result_pages):
 
 
 def main():
-    create_table.delay()
     tasks_group = group(reading_pages.s(i) for i in range(1, 11))
     tasks_chain = chain(tasks_group, write_to_db.s())
+    create_table.delay()
     result = tasks_chain.delay()
     result.get()
 
