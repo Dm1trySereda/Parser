@@ -15,15 +15,15 @@ parser = Celery(
 
 )
 
-user_name = os.getenv('MYSQL_USER')
-user_password = os.getenv('MYSQL_PASSWORD')
-db_name = os.getenv('MYSQL_DATABASE')
+# user_name = os.getenv('MYSQL_USER')
+# user_password = os.getenv('MYSQL_PASSWORD')
+# db_name = os.getenv('MYSQL_DATABASE')
 
 db_connection = connect(
-    host="db_mysql",
+    host='db_mysql',
     user='root',
     password='12345',
-    database='library',
+    database='library'
 )
 
 
@@ -75,7 +75,6 @@ def create_table():
         db_cursor.execute("""
                 CREATE TABLE books (
                     id INT AUTO_INCREMENT PRIMARY KEY,
-                    page VARCHAR(255),
                     title VARCHAR(255),
                     author VARCHAR(255),
                     price DECIMAL(10,2),
@@ -98,11 +97,11 @@ def write_to_db(result_pages):
                 price = book['Цена']
                 rating = book['Рейтинг']
                 query = """
-                        INSERT INTO books (page, title, author, price, rating)
-                        VALUES (%s, %s, %s, %s, %s)
+                        INSERT INTO books (title, author, price, rating)
+                        VALUES (%s, %s, %s, %s)
                     """
                 values = [
-                    (key, title, author, price, rating),
+                    (title, author, price, rating),
                 ]
                 db_cursor.executemany(query, values)
 
@@ -111,7 +110,7 @@ def write_to_db(result_pages):
 
 
 def main():
-    tasks_group = group(reading_pages.s(i) for i in range(1, 11))
+    tasks_group = group(reading_pages.s(i) for i in range(1, 10))
     tasks_chain = chain(tasks_group, write_to_db.s())
     create_table.delay()
     result = tasks_chain.delay()

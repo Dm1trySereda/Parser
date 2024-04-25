@@ -26,7 +26,7 @@ services:
       - db_mysql
       - phpmyadmin
     volumes:
-      - /media/dima/Новый том/Trainee/parser:/myapp
+      - /mnt/parser:/myapp
     container_name: parser
   db_mysql:
     image: mysql
@@ -48,3 +48,16 @@ services:
       - db_mysql
     links:
       - db_mysql
+  fastapi:
+    build:
+      dockerfile: Dockerfile
+    command: [ "uvicorn", "test_api:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
+    ports:
+      - "8000:8000"
+    volumes:
+      - /mnt/parser:/myapp
+    depends_on:
+      - rabbitmq
+      - redis
+      - db_mysql
+      - phpmyadmin
