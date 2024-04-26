@@ -13,8 +13,8 @@ services:
     build: . # подключение dockerfile
     restart: always
     environment:
-      - BROKER_URL=amqp://rabbitmq:5672//
-      - RESULT_BACKEND=redis://redis:6379/0
+      - BROKER_URL=${BROKER_URL}
+      - RESULT_BACKEND=${RESULT_BACKEND}
     depends_on:
       - rabbitmq
       - redis
@@ -33,15 +33,15 @@ services:
     restart: always
     command: --default-authentication-plugin=mysql_native_password
     environment:
-      MYSQL_ROOT_PASSWORD: 12345
-      MYSQL_DATABASE: library
-      MYSQL_USER: dima
-      MYSQL_PASSWORD: 12345
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
   phpmyadmin:
     image: phpmyadmin
     restart: always
     ports:
-      - '8081:80'
+      - '8080:80'
     environment:
       - PMA_ARBITRARY=1
     depends_on:
