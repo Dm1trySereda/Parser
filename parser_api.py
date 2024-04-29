@@ -1,23 +1,14 @@
-import os
 from fastapi import FastAPI
-from mysql.connector import connect
-from dotenv import load_dotenv
-
-load_dotenv()
+from db_config import *
 
 app = FastAPI()
-
-db_connection = connect(
-    host=os.getenv('MYSQL_HOST'),
-    user=os.getenv('MYSQL_USER'),
-    password=os.getenv('MYSQL_PASSWORD'),
-    database=os.getenv('MYSQL_DATABASE')
-)
 
 
 @app.get("/")
 async def read_root():
-    return {"hello from "}
+    if db_connection:
+        return {"Connection": "Success"}
+    return {"Connection": "Error"}
 
 
 # Пагинация

@@ -10,7 +10,9 @@ services:
       - '5672:5672'
       - '15672:15672'
   celery:
-    build: . # подключение dockerfile
+    container_name: parser
+    build:
+      dockerfile: Dockerfile
     restart: always
     environment:
       - BROKER_URL=${BROKER_URL}
@@ -27,7 +29,6 @@ services:
       - phpmyadmin
     volumes:
       - /mnt/parser:/myapp
-    container_name: parser
   db_mysql:
     image: mysql
     restart: always
@@ -51,7 +52,7 @@ services:
   fastapi:
     build:
       dockerfile: Dockerfile
-    command: [ "uvicorn", "test_api:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
+    command: [ "uvicorn", "parser_api:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
     ports:
       - "8000:8000"
     volumes:
@@ -61,3 +62,4 @@ services:
       - redis
       - db_mysql
       - phpmyadmin
+      - celery

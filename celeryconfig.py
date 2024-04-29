@@ -1,1 +1,0 @@
-accept_content = ['json']
