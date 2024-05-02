@@ -1,5 +1,5 @@
 import asyncio
-from sqlalchemy import select, func, insert, not_, exists
+from sqlalchemy import select, func, insert, exists
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from database.core import async_engine
 from database.models import Book, BooksHistory
@@ -47,20 +47,12 @@ def insert_books_sync(read_pages: list):
 
 async def insert_book_history():
     async with async_session_manager() as async_session:
-        subquery = (
-            select(1)
-            .select_from(BooksHistory)
-            .where(
-                (BooksHistory.book_id == Book.id) &
-                (BooksHistory.price == Book.price_new)
-            )
-        )
         stmt = (
             insert(BooksHistory)
             .from_select(
                 ['book_id', 'date', 'book_num', 'title', 'price'],
                 select(Book.id, Book.date, Book.book_num, Book.title, Book.price_new)
-                .where(not_(exists(subquery)))
+                .where(~exists().where(BooksHistory.book_id == Book.id).where(BooksHistory.price == Book.price_new))
             )
         )
         await async_session.execute(stmt)

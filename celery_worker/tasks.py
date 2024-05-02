@@ -31,7 +31,7 @@ def write_history_to_db():
 
 def main():
     create_tables_task.delay()
-    read_tasks = group(reading_pages.s(i) for i in range(1, 11))
+    read_tasks = group(reading_pages.s(i) for i in range(1, 21))
     write_tasks_chain = chain(read_tasks, insert_books_task.s())
     result = write_tasks_chain.delay()
     result.get()

@@ -1,2 +1,2 @@
 run-task-in-docker:
-	docker exec parser python celery_worker/celery_tasks.py
+	docker exec parser python celery_worker/tasks.py

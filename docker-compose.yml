@@ -28,7 +28,7 @@ services:
       - db_mysql
       - phpmyadmin
     volumes:
-      - /mnt/parser:/myapp
+      - /mnt/parser:/myapp/
   db_mysql:
     image: mysql:8.0
     restart: always
@@ -58,7 +58,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - /mnt/parser:/myapp
+      - /mnt/parser:/myapp/
     depends_on:
       - rabbitmq
       - redis
