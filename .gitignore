@@ -2,4 +2,4 @@
 /.git/
 /.idea/
 /.venv/
-/.env/
+/.env
