@@ -16,17 +16,18 @@ async def insert_books(read_pages: list):
                     result = await async_session.execute(stmt)
                     existing_book = result.scalar_one_or_none()
 
-                    if existing_book is None:
-                        book_num = book['book_num']
-                        title = book['name']
-                        author = book['author']
-                        price_new = book['price']
-                        price_old = book['price_old']
-                        discount = book['discount']
-                        rating = book['rating']
-                        image = book['image']
+                    book_num = book['book_num']
+                    title = book['name']
+                    author = book['author']
+                    price_new = book['price']
+                    price_old = book['price_old']
+                    discount = book['discount']
+                    rating = book['rating']
+                    image = book['image']
 
-                        book = Book(
+                    # Если книга не существует - добавляем
+                    if existing_book is None:
+                        books = Book(
                             book_num=book_num,
                             title=title,
                             author=author,
@@ -36,7 +37,18 @@ async def insert_books(read_pages: list):
                             rating=rating,
                             image=image,
                         )
-                        async_session.add(book)
+                        async_session.add(books)
+                        # Если книга существует - сравниваем цену в бд и данных парсера, если отличается - обновляем цену
+                    else:
+                        if existing_book.price_new != price_new:
+                            existing_book.title = title
+                            existing_book.author = author
+                            existing_book.price_new = price_new
+                            existing_book.price_old = price_old
+                            existing_book.discount = discount
+                            existing_book.rating = rating
+                            existing_book.image = image
+
         await async_session.commit()
 
 

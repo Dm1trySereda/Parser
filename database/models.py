@@ -7,13 +7,15 @@ from sqlalchemy import String, Date, DECIMAL, ForeignKey, Column, Integer, BigIn
 
 
 class Base(DeclarativeBase):
-    pass
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(book_num={self.book_num}, title={self.title}, author={self.author}, price_new={self.price_new}, price_old={self.price_old}, discount={self.discount}, rating={self.rating}, image={self.image})"
 
 
 class Book(Base):
     __tablename__ = "books"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     date: Mapped[datetime] = mapped_column(default=datetime.now().date())
     book_num: Mapped[int]
     title: Mapped[str] = mapped_column(String(255))
@@ -29,7 +31,6 @@ class Book(Base):
 class BooksHistory(Base):
     __tablename__ = "books_history"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
     book_id: Mapped[int] = mapped_column(ForeignKey('books.id'))
     book = relationship("Book", back_populates="books_history")
     date: Mapped[datetime] = mapped_column(default=datetime.now().date())

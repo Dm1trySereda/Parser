@@ -12,7 +12,7 @@ services:
   celery:
     container_name: parser
     build:
-      dockerfile: Dockerfile
+      dockerfile: celery_worker/Dockerfile
     restart: always
     environment:
       - BROKER_URL=${BROKER_URL}
@@ -28,7 +28,7 @@ services:
       - db_mysql
       - phpmyadmin
     volumes:
-      - /mnt/parser:/myapp/
+      - /mnt/parser/celery_worker:/myapp/celery_worker
   db_mysql:
     image: mysql:8.0
     restart: always
@@ -53,8 +53,7 @@ services:
       - db_mysql
   fastapi:
     build:
-      dockerfile: Dockerfile
-    command: [ "uvicorn", "FastAPI.parser_api:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
+      dockerfile: FastAPI/Dockerfile
     ports:
       - "8000:8000"
     volumes:

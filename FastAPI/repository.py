@@ -64,7 +64,7 @@ async def select_books_search(name):
                 Book.rating,
                 Book.image,
             )
-            .where(Book.title.like(f"%{name}%"))
+            .where(Book.title.contains(f"{name}"))
         )
         result = await async_session.execute(stmt)
         return await get_books(result)
