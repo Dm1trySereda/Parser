@@ -17,10 +17,10 @@ class Book(Base):
     __tablename__ = "books"
 
     date: Mapped[datetime] = mapped_column(default=datetime.now().date())
-    book_num: Mapped[int]
+    book_num: Mapped[int] = mapped_column(BigInteger)
     title: Mapped[str] = mapped_column(String(255))
     author: Mapped[str] = mapped_column(String(255))
-    price_new: Mapped[float] = mapped_column(DECIMAL(10, 2))
+    price_new: Mapped[float] = mapped_column(DECIMAL(10, 2), nullable=True)
     price_old: Mapped[float] = mapped_column(DECIMAL(10, 2), nullable=True)
     discount: Mapped[str] = mapped_column(String(20), nullable=True)
     rating: Mapped[float] = mapped_column(DECIMAL(4, 2), nullable=True)
@@ -34,6 +34,6 @@ class BooksHistory(Base):
     book_id: Mapped[int] = mapped_column(ForeignKey('books.id'))
     book = relationship("Book", back_populates="books_history")
     date: Mapped[datetime] = mapped_column(default=datetime.now().date())
-    book_num: Mapped[int] = mapped_column(unique=False)
+    book_num: Mapped[int] = mapped_column(BigInteger, unique=False, nullable=True)
     title: Mapped[str] = mapped_column(String(255))
     price: Mapped[float] = mapped_column(DECIMAL(10, 2))

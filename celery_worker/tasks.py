@@ -1,5 +1,5 @@
 from celery import group, chain
-from celery_worker.core import parser_app
+from .core import parser_app
 
 from database.core import engine
 from database.models import Base
@@ -13,11 +13,6 @@ def reading_pages(page):
     return parse_the_page(page)
 
 
-@parser_app.task(name="create_tables")
-def create_tables_task():
-    Base.metadata.create_all(bind=engine)
-
-
 @parser_app.task(name="insert_books_task")
 def insert_books_task(read_pages: list):
     return insert_books_sync(read_pages)
@@ -25,18 +20,17 @@ def insert_books_task(read_pages: list):
 
 #
 @parser_app.task(name="write_history_to_db")
-def write_history_to_db():
+def insert_books_history_task():
     return insert_books_history_sync()
 
 
-def main():
-    create_tables_task.delay()
-    read_tasks = group(reading_pages.s(i) for i in range(1, 21))
+def run_tasks():
+    read_tasks = group(reading_pages.s(i) for i in range(1, 101))
     write_tasks_chain = chain(read_tasks, insert_books_task.s())
     result = write_tasks_chain.delay()
     result.get()
-    write_history_to_db.delay()
+    insert_books_history_task.delay()
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    run_tasks()
