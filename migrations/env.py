@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 from database.models import Base, Book, BooksHistory
-from database.core import async_db_connection_url
+from database.core import async_db_connection_url, db_connection_url
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -17,8 +17,7 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 config.set_main_option("sqlalchemy.url",
-                       async_db_connection_url.render_as_string(
-                           hide_password=False) + "?async_fallback=True")
+                       db_connection_url.render_as_string(hide_password=False))
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel

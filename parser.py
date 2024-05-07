@@ -1,4 +1,5 @@
 import requests
+import pandas as pd
 from bs4 import BeautifulSoup
 
 
@@ -21,25 +22,43 @@ def parse_the_page(page):
         book_num = book.get('data-value')
         book_title = book_body.find('h3', class_="product-card__title").text.strip()
         book_author = book_body.find('div', class_="product-card__subtitle").text.strip()
-        book_price_first = book_footer.find('b')
-        book_price_old = book_body.find('s', class_="d-inline-block text-muted text-decoration-line-through ms-1")
-        book_rating = book_body.find('span', class_="me-1")
-        book_discount = book_header.find('span', class_="badge badge-sm badge-discount-primary")
-        book_image = book_header.find('img', class_="product-card__cover-image")
+        book_price = validation(book_footer.find('b'), is_price=True)
+        book_price_old = validation(
+            book_body.find('s', class_="d-inline-block text-muted text-decoration-line-through ms-1"), is_price=True)
+        book_rating = validation(book_body.find('span', class_="me-1"), is_rating=True)
+        book_discount = validation(
+            book_header.find('span', class_="badge badge-sm badge-discount-primary"),
+            is_discount=True)
+        book_image = validation(book_header.find('img', class_="product-card__cover-image"), is_image=True)
 
         book_data = {
             'book_num': book_num,
             'name': book_title,
             'author': book_author,
-            'price': book_price_first.text.replace('\xa0', '').rstrip('р.').replace(',',
-                                                                                    '.').strip() if book_price_first else None,
-            'price_old': book_price_old.text.replace('\xa0', '').rstrip('р.').replace(',',
-                                                                                      '.').strip() if book_price_old else None,
-            'discount': book_discount.text.strip() if book_discount else None,
-            'rating': book_rating.text.replace(',', '.') if book_rating else None,
-            'image': book_image.get('src') if book_image else None
+            'price': book_price,
+            'price_old': book_price_old,
+            'discount': book_discount,
+            'rating': book_rating,
+            'image': book_image
         }
         library.append(book_data)
+    books_frame = pd.DataFrame(library)
     all_books_in_page = {f"Страница {page}": library}
 
     return all_books_in_page
+
+
+def validation(value, is_price=False, is_rating=False, is_discount=False, is_image=False):
+    if value:
+        if is_price:
+            value = value.text.replace('\xa0', '').rstrip('р.').replace(',', '.').strip()
+        elif is_rating:
+            value = value.text.replace(',', '.')
+        elif is_discount:
+            value = value.text.strip()
+        elif is_image:
+            value = value.get('src')
+        return value
+    return None
+
+
