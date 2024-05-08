@@ -29,6 +29,7 @@ services:
       - phpmyadmin
     volumes:
       - /mnt/parser/celery_worker:/myapp/celery_worker
+      - /mnt/parser/database:/myapp/database
   db_mysql:
     image: mysql:8.0
     restart: always
@@ -57,7 +58,8 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - /mnt/parser:/myapp/
+      - /mnt/parser/FastAPI:/myapp/FastAPI
+      - /mnt/parser/database:/myapp/database
     depends_on:
       - rabbitmq
       - redis

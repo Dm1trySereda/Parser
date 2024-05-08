@@ -36,4 +36,4 @@ class BooksHistory(Base):
     date: Mapped[datetime] = mapped_column(default=datetime.now().date())
     book_num: Mapped[int] = mapped_column(BigInteger, unique=False, nullable=True)
     title: Mapped[str] = mapped_column(String(255))
-    price: Mapped[float] = mapped_column(DECIMAL(10, 2))
+    price: Mapped[float] = mapped_column(DECIMAL(10, 2), nullable=True)
