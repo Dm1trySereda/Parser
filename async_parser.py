@@ -80,7 +80,7 @@ def validation(value, is_price=False, is_rating=False, is_discount=False, is_ima
 #
 #
 # #
-#
+# #
 # if __name__ == "__main__":
 #     print(asyncio.run(reading_session(1)))
 
