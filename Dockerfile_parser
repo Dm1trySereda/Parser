@@ -1,8 +1,7 @@
 FROM python:3.10
 WORKDIR /myapp
 COPY requirements.txt /myapp
-COPY src/parser /myapp/src/parser
-COPY src/database /myapp/src/database
-COPY .env /myapp/
+COPY src /myapp
 RUN pip install -r requirements.txt
-CMD  [ "uvicorn", "src.parser.parser_api:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
+COPY .env /myapp/
+CMD  [ "uvicorn", "src.services.parser.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]

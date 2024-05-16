@@ -11,7 +11,7 @@ class ConfigDataBase(BaseSettings):
     MYSQL_HOST: str
     MYSQL_PORT: str
     MYSQL_DATABASE: str
-    DB_ECHO_LOG: bool = False
+    DB_ECHO_LOG: bool = True
 
     @property
     def database_url(self) -> Optional[MySQLDsn]:

@@ -27,6 +27,7 @@ class DatabaseHelper:
         session: AsyncSession = self.session_manager()
         try:
             yield session
+            await session.commit()
         except exc.SQLAlchemyError as error:
             await session.rollback()
             raise error

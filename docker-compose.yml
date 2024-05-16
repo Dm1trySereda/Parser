@@ -34,7 +34,7 @@ services:
     links:
       - db_mysql
   celery:
-    container_name: tasks
+    container_name: celery_container
     build:
       dockerfile: Dockerfile_celery
     restart: always
@@ -58,18 +58,15 @@ services:
       - db_mysql
       - phpmyadmin
     volumes:
-      - /mnt/parser/src/celery_worker:/myapp/src/celery_worker
-      - /mnt/parser/src/config:/myapp/src/config
-      - /mnt/parser/src/database:/myapp/src/database
-  api:
+      - /mnt/parser/src/:/myapp/src/
+  api_services:
     container_name: parser_api
     build:
       dockerfile: Dockerfile_parser
     ports:
       - "8000:8000"
     volumes:
-      - /mnt/parser/src/parser:/myapp/src/parser
-      - /mnt/parser/src/database:/myapp/src/database
+      - /mnt/parser/src/:/myapp/src/
     depends_on:
       - rabbitmq
       - redis

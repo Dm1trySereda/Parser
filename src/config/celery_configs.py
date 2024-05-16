@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings
 class ConfigCelery(BaseSettings):
     BROKER_URL: str
     RESULT_BACKEND: str
-    INCLUDE: list = ["src.celery_worker.tasks"]
+    INCLUDE: list = ["src.services.celery.tasks"]
 
     class Config:
         extra = "ignore"

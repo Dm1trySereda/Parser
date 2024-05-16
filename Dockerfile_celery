@@ -2,10 +2,7 @@ FROM python:3.10
 WORKDIR /myapp
 COPY requirements.txt /myapp
 COPY .env /myapp
-COPY src/celery_worker /myapp/src/celery_worker
-COPY src/database /myapp/src/database
-COPY src/config/ /myapp/src/config
-COPY src/parser/async_parser.py /myapp/src/parser/
+COPY src /myapp
 COPY start.sh /myapp/
 RUN pip install -r requirements.txt
 RUN chmod +x /myapp/start.sh
