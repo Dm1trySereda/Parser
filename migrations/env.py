@@ -1,11 +1,10 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
-from database.models import Base, Book, BooksHistory
-from database.core import async_db_connection_url, db_connection_url
+from sqlalchemy import engine_from_config, pool
+
+from src.config.database.db_helpers import setting_db
+from src.database.models import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -16,8 +15,7 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option("sqlalchemy.url",
-                       db_connection_url.render_as_string(hide_password=False))
+config.set_main_option("sqlalchemy.url", setting_db.database_url)
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
@@ -72,7 +70,9 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata, compare_server_default=True
+            connection=connection,
+            target_metadata=target_metadata,
+            compare_server_default=True,
         )
 
         with context.begin_transaction():

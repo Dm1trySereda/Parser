@@ -9,36 +9,17 @@ services:
     ports:
       - '5672:5672'
       - '15672:15672'
-  celery:
-    container_name: parser
-    build:
-      dockerfile: celery_worker/Dockerfile
-    restart: always
-    environment:
-      - BROKER_URL=${BROKER_URL}
-      - RESULT_BACKEND=${RESULT_BACKEND}
-    depends_on:
-      - rabbitmq
-      - redis
-      - db_mysql
-      - phpmyadmin
-    links:
-      - rabbitmq
-      - redis
-      - db_mysql
-      - phpmyadmin
-    volumes:
-      - /mnt/parser/celery_worker:/myapp/celery_worker
-      - /mnt/parser/database:/myapp/database
   db_mysql:
     image: mysql:8.0
     restart: always
     command: --default-authentication-plugin=mysql_native_password
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      - MYSQL_HOST=db_mysql
+      - MYSQL_ROOT_PASSWORD=12345
+      - MYSQL_DATABASE=library
+      - MYSQL_USER=dima
+      - MYSQL_PASSWORD=12345
+      - MYSQL_PORT=3306
     ports:
       - '3306:3306'
   phpmyadmin:
@@ -52,14 +33,43 @@ services:
       - db_mysql
     links:
       - db_mysql
-  fastapi:
+  celery:
+    container_name: tasks
     build:
-      dockerfile: FastAPI/Dockerfile
+      dockerfile: Dockerfile_celery
+    restart: always
+    environment:
+      - BROKER_URL=${BROKER_URL}
+      - RESULT_BACKEND=${RESULT_BACKEND}
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_PORT=${MYSQL_PORT}
+    depends_on:
+      - rabbitmq
+      - redis
+      - db_mysql
+      - phpmyadmin
+    links:
+      - rabbitmq
+      - redis
+      - db_mysql
+      - phpmyadmin
+    volumes:
+      - /mnt/parser/src/celery_worker:/myapp/src/celery_worker
+      - /mnt/parser/src/config:/myapp/src/config
+      - /mnt/parser/src/database:/myapp/src/database
+  api:
+    container_name: parser_api
+    build:
+      dockerfile: Dockerfile_parser
     ports:
       - "8000:8000"
     volumes:
-      - /mnt/parser/FastAPI:/myapp/FastAPI
-      - /mnt/parser/database:/myapp/database
+      - /mnt/parser/src/parser:/myapp/src/parser
+      - /mnt/parser/src/database:/myapp/src/database
     depends_on:
       - rabbitmq
       - redis
