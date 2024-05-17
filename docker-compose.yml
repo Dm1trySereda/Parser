@@ -34,9 +34,9 @@ services:
     links:
       - db_mysql
   celery:
-    container_name: celery_container
     build:
-      dockerfile: Dockerfile_celery
+      dockerfile: Dockerfile
+      target: celery-stage
     restart: always
     environment:
       - BROKER_URL=${BROKER_URL}
@@ -58,15 +58,15 @@ services:
       - db_mysql
       - phpmyadmin
     volumes:
-      - /mnt/parser/src/:/myapp/src/
+      - /mnt/parser/src:/myapp/src
   api_services:
-    container_name: parser_api
     build:
-      dockerfile: Dockerfile_parser
+      dockerfile: Dockerfile
+      target: fastapi-stage
     ports:
       - "8000:8000"
     volumes:
-      - /mnt/parser/src/:/myapp/src/
+      - /mnt/parser/src:/myapp/src
     depends_on:
       - rabbitmq
       - redis

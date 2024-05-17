@@ -1,8 +1,8 @@
 from sqlalchemy import exists, insert, select
 
 from src.config.database.db_helpers import db_helper
-from src.models.books_history_models import BookHistory
-from src.models.books_models import Book
+from src.models.books import Book
+from src.models.history import History
 
 
 class BaseHandler:
@@ -26,7 +26,7 @@ class BaseHandler:
 
     async def process_books_history(self):
         async with self.get_async_session as async_session:
-            book_history_handler = BookHistoryHandler(async_session)
+            book_history_handler = HistoryHandler(async_session)
             await book_history_handler.update_books_history()
 
 
@@ -58,12 +58,12 @@ class BookHandler:
         await self.async_session.flush()
 
 
-class BookHistoryHandler:
+class HistoryHandler:
     def __init__(self, async_session):
         self.async_session = async_session
 
     async def update_books_history(self):
-        stmt = insert(BookHistory).from_select(
+        stmt = insert(History).from_select(
             ["book_id", "created_at", "updated_at", "book_num", "title", "price"],
             select(
                 Book.id,
@@ -74,8 +74,8 @@ class BookHistoryHandler:
                 Book.price_new,
             ).where(
                 ~exists()
-                .where(BookHistory.book_num == Book.book_num)
-                .where(BookHistory.price == Book.price_new)
+                .where(History.book_num == Book.book_num)
+                .where(History.price == Book.price_new)
             ),
         )
         await self.async_session.execute(stmt)

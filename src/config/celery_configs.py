@@ -19,5 +19,3 @@ parser = Celery(
     backend=config_celery.RESULT_BACKEND,
     include=config_celery.INCLUDE,
 )
-
-

@@ -1,9 +1,0 @@
-FROM python:3.10
-WORKDIR /myapp
-COPY requirements.txt /myapp
-COPY .env /myapp
-COPY src /myapp
-COPY start.sh /myapp/
-RUN pip install -r requirements.txt
-RUN chmod +x /myapp/start.sh
-CMD ["sh", "/myapp/start.sh"]

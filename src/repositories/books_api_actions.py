@@ -2,8 +2,8 @@ from typing import Sequence
 
 from sqlalchemy import and_, asc, delete, desc, func, select, update
 
-from src.models.books_history_models import BookHistory
-from src.models.books_models import Book
+from src.models.books import Book
+from src.models.history import History
 
 
 class BaseRepository:
@@ -29,7 +29,7 @@ class DeleteEntity(BaseRepository):
 class SearchBook(BaseRepository):
 
     async def select_book(
-            self, book_id: int, book_num: int, title: str
+        self, book_id: int, book_num: int, title: str
     ) -> Sequence[Book]:
         select_values = list()
 
@@ -48,13 +48,13 @@ class SearchBook(BaseRepository):
 
 class UpdateBook(BaseRepository):
     async def update_book(
-            self,
-            book_num: int,
-            new_title: str = None,
-            new_author: str = None,
-            new_price: float = None,
-            new_rating: float = None,
-            new_image: str = None,
+        self,
+        book_num: int,
+        new_title: str = None,
+        new_author: str = None,
+        new_price: float = None,
+        new_rating: float = None,
+        new_image: str = None,
     ) -> None:
         update_values = dict()
         if new_title is not None:
@@ -73,13 +73,13 @@ class UpdateBook(BaseRepository):
 
 class InsertBook(BaseRepository):
     async def insert_new_book(
-            self,
-            book_num: int,
-            title: str,
-            author: str,
-            price: float,
-            rating: float,
-            image: str,
+        self,
+        book_num: int,
+        title: str,
+        author: str,
+        price: float,
+        rating: float,
+        image: str,
     ) -> None:
         stmt = select(Book).where(Book.book_num == book_num)
         result = await self.async_session.execute(stmt)
@@ -111,11 +111,11 @@ class DeleteBook(DeleteEntity):
         super().__init__(Book, session)
 
 
-class DeleteBookHistory(DeleteEntity):
+class DeleteHistory(DeleteEntity):
     def __init__(self, session):
-        super().__init__(BookHistory, session)
+        super().__init__(History, session)
 
-    async def delete_book_history(self, book_id=None, book_num=None):
+    async def delete_history(self, book_id=None, book_num=None):
         await self.delete(book_id=book_id, book_num=book_num)
         book_deleter = DeleteBook(self.async_session)
         await book_deleter.delete(book_id=book_id, book_num=book_num)
@@ -123,7 +123,7 @@ class DeleteBookHistory(DeleteEntity):
 
 class Paginate(BaseRepository):
     async def select_books(
-            self, page: int, books_quantity: int, sort_by: str, order_asc: bool
+        self, page: int, books_quantity: int, sort_by: str, order_asc: bool
     ) -> Sequence[Book]:
         books_quantity = books_quantity or 10
         books_offset = (page - 1) * books_quantity
@@ -139,16 +139,16 @@ class Paginate(BaseRepository):
 class RepetitiveBook(BaseRepository):
     async def select_book_history(self):
         stmt = (
-            select(BookHistory.book_num)
-            .group_by(BookHistory.book_num)
-            .having(func.count(BookHistory.book_num) > 1)
+            select(History.book_num)
+            .group_by(History.book_num)
+            .having(func.count(History.book_num) > 1)
         )
         result = await self.async_session.execute(stmt)
 
         duplicate_book_nums = result.scalars().all()
         duplicated_books = list()
         for book_num in duplicate_book_nums:
-            stmt = select(BookHistory).where(BookHistory.book_num == book_num)
+            stmt = select(History).where(History.book_num == book_num)
             result = await self.async_session.execute(stmt)
             duplicated_books.extend(result.scalars().all())
 

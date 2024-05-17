@@ -3,8 +3,8 @@ from fastapi.templating import Jinja2Templates
 from starlette.requests import Request
 
 from src.config.database.db_helpers import db_helper
-from src.repositories.main_repository import (
-    DeleteBookHistory,
+from src.repositories.books_api_actions import (
+    DeleteHistory,
     InsertBook,
     Paginate,
     RepetitiveBook,
@@ -28,7 +28,7 @@ async def db_session_middleware(request: Request, call_next):
 
 @app.get("/", tags=["Search"])
 async def search_books(
-        request: Request, book_id: int = None, book_num: int = None, title: str = None
+    request: Request, book_id: int = None, book_num: int = None, title: str = None
 ):
     book_searcher = SearchBook(request.state.db)
     result = await book_searcher.select_book(book_id, book_num, title)
@@ -37,11 +37,11 @@ async def search_books(
 
 @app.get("/books/", tags=["Pagination"])
 async def get_books_on_page(
-        request: Request,
-        page: int = 1,
-        books_quantity: int = None,
-        sort_by: str = "title",
-        order_asc: bool = False,
+    request: Request,
+    page: int = 1,
+    books_quantity: int = None,
+    sort_by: str = "title",
+    order_asc: bool = False,
 ):
     book_paginator = Paginate(request.state.db)
     result = await book_paginator.select_books(page, books_quantity, sort_by, order_asc)
@@ -50,13 +50,13 @@ async def get_books_on_page(
 
 @app.post("/books/change", tags=["Change book"])
 async def change_book(
-        request: Request,
-        book_num: int,
-        new_title: str = None,
-        new_author: str = None,
-        new_price: float = None,
-        new_rating: float = None,
-        new_image: str = None,
+    request: Request,
+    book_num: int,
+    new_title: str = None,
+    new_author: str = None,
+    new_price: float = None,
+    new_rating: float = None,
+    new_image: str = None,
 ):
     book_updater = UpdateBook(request.state.db)
     await book_updater.update_book(
@@ -73,13 +73,13 @@ async def change_book(
 
 @app.post("/books/add", tags=["Add book"])
 async def add_book(
-        request: Request,
-        book_num: int,
-        title: str,
-        author: str,
-        price: float,
-        rating: float,
-        image: str,
+    request: Request,
+    book_num: int,
+    title: str,
+    author: str,
+    price: float,
+    rating: float,
+    image: str,
 ):
     book_inserter = InsertBook(request.state.db)
     await book_inserter.insert_new_book(book_num, title, author, price, rating, image)
@@ -95,8 +95,8 @@ async def add_book(
 
 @app.delete("/books/delete", tags=["Delete book"])
 async def delete_book(request: Request, book_id: int = None, book_num: int = None):
-    book_deleter = DeleteBookHistory(request.state.db)
-    await book_deleter.delete_book_history(book_id, book_num)
+    book_deleter = DeleteHistory(request.state.db)
+    await book_deleter.delete_history(book_id, book_num)
     return {"Delete book": "OK"}
 
 
