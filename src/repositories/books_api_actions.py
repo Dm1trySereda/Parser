@@ -29,7 +29,7 @@ class DeleteEntity(BaseRepository):
 class SearchBook(BaseRepository):
 
     async def select_book(
-        self, book_id: int, book_num: int, title: str
+            self, book_id: int, book_num: int, title: str
     ) -> Sequence[Book]:
         select_values = list()
 
@@ -47,63 +47,64 @@ class SearchBook(BaseRepository):
 
 
 class UpdateBook(BaseRepository):
-    async def update_book(
-        self,
-        book_num: int,
-        new_title: str = None,
-        new_author: str = None,
-        new_price: float = None,
-        new_rating: float = None,
-        new_image: str = None,
-    ) -> None:
-        update_values = dict()
-        if new_title is not None:
-            update_values["title"] = new_title
-        if new_author is not None:
-            update_values["author"] = new_author
+    async def update_book(self, book: dict) -> None:
+        current_book = select(Book.price_new).where(
+            Book.book_num == book.get("book_num")
+        )
+        result = await self.async_session.execute(current_book)
+        current_book_old = result.scalars().first()
+
+        update_values = {
+            "title": book.get("title"),
+            "author": book.get("author"),
+            "rating": book.get("rating"),
+            "image": book.get("image"),
+        }
+
+        new_price = book.get("price")
         if new_price is not None:
             update_values["price_new"] = new_price
-        if new_rating is not None:
-            update_values["rating"] = new_rating
-        if new_image is not None:
-            update_values["image"] = new_image
-        stmt = update(Book).where(Book.book_num == book_num).values(**update_values)
+            update_values["price_old"] = current_book_old
+            update_values["discount"] = (
+                    str(
+                        round(
+                            (float(current_book_old) - new_price)
+                            / float(current_book_old) * 100,
+                            2,
+                        )
+                    )
+                    + "%"
+            )
+
+        # Очистка словаря от значений None
+        update_values = {k: v for k, v in update_values.items() if v is not None}
+
+        stmt = (
+            update(Book)
+            .where(Book.book_num == book.get("book_num"))
+            .values(**update_values)
+        )
         await self.async_session.execute(stmt)
 
 
 class InsertBook(BaseRepository):
-    async def insert_new_book(
-        self,
-        book_num: int,
-        title: str,
-        author: str,
-        price: float,
-        rating: float,
-        image: str,
-    ) -> None:
-        stmt = select(Book).where(Book.book_num == book_num)
+    async def insert_new_book(self, new_book: dict) -> None:
+        stmt = select(Book).where(Book.book_num == new_book.get("book_num"))
         result = await self.async_session.execute(stmt)
         existing_book = result.scalars().first()
         if existing_book is None:
             new_book = Book(
-                book_num=book_num,
-                title=title,
-                author=author,
-                price_new=price,
-                rating=rating,
-                image=image,
+                book_num=new_book.get("book_num"),
+                title=new_book.get("title"),
+                author=new_book.get("author"),
+                price_new=new_book.get("price"),
+                rating=new_book.get("rating"),
+                image=new_book.get("image"),
             )
             self.async_session.add(new_book)
         else:
             book_updater = UpdateBook(self.async_session)
-            await book_updater.update_book(
-                book_num=book_num,
-                new_title=title,
-                new_author=author,
-                new_price=price,
-                new_rating=rating,
-                new_image=image,
-            )
+            await book_updater.update_book(book=new_book)
 
 
 class DeleteBook(DeleteEntity):
@@ -117,13 +118,14 @@ class DeleteHistory(DeleteEntity):
 
     async def delete_history(self, book_id=None, book_num=None):
         await self.delete(book_id=book_id, book_num=book_num)
+
         book_deleter = DeleteBook(self.async_session)
-        await book_deleter.delete(book_id=book_id, book_num=book_num)
+        await book_deleter.delete(id=book_id, book_num=book_num)
 
 
 class Paginate(BaseRepository):
     async def select_books(
-        self, page: int, books_quantity: int, sort_by: str, order_asc: bool
+            self, page: int, books_quantity: int, sort_by: str, order_asc: bool
     ) -> Sequence[Book]:
         books_quantity = books_quantity or 10
         books_offset = (page - 1) * books_quantity

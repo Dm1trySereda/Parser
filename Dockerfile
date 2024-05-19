@@ -14,5 +14,5 @@ CMD ["sh", "/myapp/celery_run.sh"]
 
 # === Сборка с fastapi ===
 FROM base as fastapi-stage
-COPY celery_run.sh /myapp
-CMD  [ "uvicorn", "src.services.parser.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
+COPY src/ /myapp/src
+CMD  [ "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]

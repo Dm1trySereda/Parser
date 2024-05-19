@@ -3,3 +3,4 @@
 /.idea/
 /.venv/
 /.env
+dump_db_tables

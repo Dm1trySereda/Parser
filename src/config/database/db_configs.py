@@ -9,7 +9,6 @@ class ConfigDataBase(BaseSettings):
     MYSQL_USER: str
     MYSQL_PASSWORD: str
     MYSQL_HOST: str
-    MYSQL_LOCAL_HOST: str
     MYSQL_PORT: str
     MYSQL_DATABASE: str
     DB_ECHO_LOG: bool = False
@@ -18,7 +17,7 @@ class ConfigDataBase(BaseSettings):
     def database_url(self) -> Optional[MySQLDsn]:
         return (
             f"mysql+pymysql://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}@"
-            f"{self.MYSQL_LOCAL_HOST}:{self.MYSQL_PORT}/{self.MYSQL_DATABASE}"
+            f"localhost:{self.MYSQL_PORT}/{self.MYSQL_DATABASE}"
         )
 
     @property
