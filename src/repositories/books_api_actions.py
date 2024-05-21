@@ -1,5 +1,6 @@
 from typing import Sequence
 
+from fastapi import HTTPException, status
 from sqlalchemy import and_, asc, delete, desc, func, select, update
 
 from src.models.books import Book
@@ -11,26 +12,11 @@ class BaseRepository:
         self.async_session = session
 
 
-class DeleteEntity(BaseRepository):
-    def __init__(self, model, session):
-        super().__init__(session)
-        self.model = model
-
-    async def delete(self, **kwargs):
-        delete_values = [
-            getattr(self.model, key) == value
-            for key, value in kwargs.items()
-            if value is not None
-        ]
-        stmt = delete(self.model).where(and_(*delete_values))
-        await self.async_session.execute(stmt)
-
-
 class SearchBook(BaseRepository):
 
     async def select_book(
-            self, book_id: int, book_num: int, title: str
-    ) -> Sequence[Book]:
+        self, book_id: int = None, book_num: int = None, title: str = None
+    ) -> Book:
         select_values = list()
 
         if book_id:
@@ -41,9 +27,12 @@ class SearchBook(BaseRepository):
             select_values.append(Book.title.contains(title))
 
         stmt = select(Book).where(and_(*select_values))
-        result = await self.async_session.execute(stmt)
-
-        return result.scalars().all()
+        fetched_books = await self.async_session.execute(stmt)
+        if not fetched_books:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Books not found"
+            )
+        return fetched_books.scalars().first()
 
 
 class UpdateBook(BaseRepository):
@@ -66,17 +55,17 @@ class UpdateBook(BaseRepository):
             update_values["price_new"] = new_price
             update_values["price_old"] = current_book_old
             update_values["discount"] = (
-                    str(
-                        round(
-                            (float(current_book_old) - new_price)
-                            / float(current_book_old) * 100,
-                            2,
-                        )
+                str(
+                    round(
+                        (float(current_book_old) - new_price)
+                        / float(current_book_old)
+                        * 100,
+                        2,
                     )
-                    + "%"
+                )
+                + "%"
             )
 
-        # Очистка словаря от значений None
         update_values = {k: v for k, v in update_values.items() if v is not None}
 
         stmt = (
@@ -97,7 +86,7 @@ class InsertBook(BaseRepository):
                 book_num=new_book.get("book_num"),
                 title=new_book.get("title"),
                 author=new_book.get("author"),
-                price_new=new_book.get("price"),
+                price_new=new_book.get("price_new"),
                 rating=new_book.get("rating"),
                 image=new_book.get("image"),
             )
@@ -107,25 +96,9 @@ class InsertBook(BaseRepository):
             await book_updater.update_book(book=new_book)
 
 
-class DeleteBook(DeleteEntity):
-    def __init__(self, session):
-        super().__init__(Book, session)
-
-
-class DeleteHistory(DeleteEntity):
-    def __init__(self, session):
-        super().__init__(History, session)
-
-    async def delete_history(self, book_id=None, book_num=None):
-        await self.delete(book_id=book_id, book_num=book_num)
-
-        book_deleter = DeleteBook(self.async_session)
-        await book_deleter.delete(id=book_id, book_num=book_num)
-
-
 class Paginate(BaseRepository):
     async def select_books(
-            self, page: int, books_quantity: int, sort_by: str, order_asc: bool
+        self, page: int, books_quantity: int, sort_by: str, order_asc: bool
     ) -> Sequence[Book]:
         books_quantity = books_quantity or 10
         books_offset = (page - 1) * books_quantity
@@ -155,3 +128,31 @@ class RepetitiveBook(BaseRepository):
             duplicated_books.extend(result.scalars().all())
 
         return duplicated_books
+
+
+class DeleteEntity(BaseRepository):
+    def __init__(self, model, session):
+        super().__init__(session)
+        self.model = model
+
+    async def delete(self, **kwargs):
+        stmt = delete(self.model).filter_by(
+            **{key: value for key, value in kwargs.items() if value}
+        )
+        await self.async_session.execute(stmt)
+
+
+class DeleteBook(DeleteEntity):
+    def __init__(self, session):
+        super().__init__(Book, session)
+
+
+class DeleteHistory(DeleteEntity):
+    def __init__(self, session):
+        super().__init__(History, session)
+
+    async def delete_history(self, book_id=None, book_num=None):
+        await self.delete(book_id=book_id, book_num=book_num)
+
+        book_deleter = DeleteBook(self.async_session)
+        await book_deleter.delete(id=book_id, book_num=book_num)

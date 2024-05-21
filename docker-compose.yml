@@ -13,13 +13,15 @@ services:
     image: mysql:8.0
     restart: always
     command: --default-authentication-plugin=mysql_native_password
+    env_file:
+      - ./.env
     environment:
-      - MYSQL_HOST=db_mysql
-      - MYSQL_ROOT_PASSWORD=12345
-      - MYSQL_DATABASE=library
-      - MYSQL_USER=dima
-      - MYSQL_PASSWORD=12345
-      - MYSQL_PORT=3306
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_PORT=${MYSQL_PORT}
     ports:
       - '3306:3306'
   phpmyadmin:
@@ -38,15 +40,11 @@ services:
       dockerfile: Dockerfile
       target: celery-stage
     restart: always
+    env_file:
+      - ./.env
     environment:
       - BROKER_URL=${BROKER_URL}
       - RESULT_BACKEND=${RESULT_BACKEND}
-      - MYSQL_HOST=${MYSQL_HOST}
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - MYSQL_PORT=${MYSQL_PORT}
     depends_on:
       - rabbitmq
       - redis
@@ -59,14 +57,20 @@ services:
       - phpmyadmin
     volumes:
       - /mnt/parser/src:/myapp/src
+      - /mnt/parser/celery_worker:/myapp/celery_worker
+      - /mnt/parser/parser:/myapp/parser
   api_services:
     build:
       dockerfile: Dockerfile
       target: fastapi-stage
+    env_file:
+      - ./.env
     ports:
       - "8000:8000"
     volumes:
       - /mnt/parser/src:/myapp/src
+      - /mnt/parser/celery_worker:/myapp/celery_worker
+      - /mnt/parser/parser:/myapp/parser
     depends_on:
       - rabbitmq
       - redis

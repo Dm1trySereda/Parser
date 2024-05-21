@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-user_routes = APIRouter(tags=['Users'])
+user_routes = APIRouter(tags=["Users"])
 
 
 @user_routes.get("/user/register")

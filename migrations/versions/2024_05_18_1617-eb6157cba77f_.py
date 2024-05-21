@@ -8,8 +8,8 @@ Create Date: 2024-05-18 16:17:57.909500
 
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
@@ -56,9 +56,7 @@ def downgrade() -> None:
     op.create_table(
         "user",
         sa.Column("email", mysql.VARCHAR(length=320), nullable=False),
-        sa.Column(
-            "hashed_password", mysql.VARCHAR(length=1024), nullable=False
-        ),
+        sa.Column("hashed_password", mysql.VARCHAR(length=1024), nullable=False),
         sa.Column(
             "is_active",
             mysql.TINYINT(display_width=1),

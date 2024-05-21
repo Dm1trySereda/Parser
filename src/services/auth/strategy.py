@@ -1,4 +1,5 @@
-from fastapi_users.authentication import JWTStrategy, AuthenticationBackend
+from fastapi_users.authentication import AuthenticationBackend, JWTStrategy
+
 from .transports import cookie_transport
 
 SECRET = "SECRET"

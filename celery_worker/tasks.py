@@ -1,11 +1,11 @@
 import asyncio
+from parser.async_parser import reading_session
 
 from celery import chain, group
 from celery.schedules import crontab
 
-from src.config.celery_configs import parser
+from celery_worker.config.celery_configs import parser
 from src.repositories.books_repository_handlers import BaseHandler
-from src.services.parser.async_parser import reading_session
 
 parser.conf.timezone = "Europe/Moscow"
 parser.conf.beat_schedule = {
