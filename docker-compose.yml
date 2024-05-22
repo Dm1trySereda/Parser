@@ -56,9 +56,9 @@ services:
       - db_mysql
       - phpmyadmin
     volumes:
-      - /mnt/parser/src:/myapp/src
-      - /mnt/parser/celery_worker:/myapp/celery_worker
-      - /mnt/parser/parser:/myapp/parser
+      - ~/parser/src:/myapp/src
+      - ~/parser/celery_worker:/myapp/celery_worker
+      - ~/parser/parser:/myapp/parser
   api_services:
     build:
       dockerfile: Dockerfile
@@ -68,9 +68,9 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - /mnt/parser/src:/myapp/src
-      - /mnt/parser/celery_worker:/myapp/celery_worker
-      - /mnt/parser/parser:/myapp/parser
+      - ~/parser/src:/myapp/src
+      - ~/parser/celery_worker:/myapp/celery_worker
+      - ~/parser/parser:/myapp/parser
     depends_on:
       - rabbitmq
       - redis

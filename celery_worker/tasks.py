@@ -5,7 +5,7 @@ from celery import chain, group
 from celery.schedules import crontab
 
 from celery_worker.config.celery_configs import parser
-from src.repositories.books_repository_handlers import BaseHandler
+from src.repositories.celery_handler.books import BaseHandler
 
 parser.conf.timezone = "Europe/Moscow"
 parser.conf.beat_schedule = {

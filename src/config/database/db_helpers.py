@@ -2,8 +2,12 @@ from asyncio import current_task
 from contextlib import asynccontextmanager
 
 from sqlalchemy import exc
-from sqlalchemy.ext.asyncio import (AsyncSession, async_scoped_session,
-                                    async_sessionmaker, create_async_engine)
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_scoped_session,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from .db_configs import setting_db
 

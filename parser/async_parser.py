@@ -51,8 +51,8 @@ async def parsing_books(page, session):
         book_discount = None
         if book_price_old:
             book_discount = (
-                str(round(100 - (float(book_price_new) * 100 / float(book_price_old))))
-                + "%"
+                    str(round(100 - (float(book_price_new) * 100 / float(book_price_old))))
+                    + "%"
             )
         book_image = validation(
             book_header.find("img", class_="product-card__cover-image"), is_image=True
@@ -66,7 +66,7 @@ async def parsing_books(page, session):
             "price_old": book_price_old,
             "discount": book_discount,
             "rating": book_rating,
-            "image": book_image,
+            "image_url": book_image,
         }
         library.append(book_data)
 
@@ -74,7 +74,7 @@ async def parsing_books(page, session):
 
 
 def validation(
-    value, is_price=False, is_rating=False, is_discount=False, is_image=False
+        value, is_price=False, is_rating=False, is_image=False
 ):
     if value:
         if is_price:
@@ -88,15 +88,15 @@ def validation(
         return value
     return None
 
-
-async def start_reading(page):
-    # result = await parsing_books(page, session)
-    # return result
-    pages = [reading_session(i) for i in range(1, page + 1)]
-    all_pages = list()
-    for page in asyncio.as_completed(pages):
-        result = all_pages.append(await page)
-    return all_pages
+#
+# async def start_reading(page):
+#     # result = await parsing_books(page, session)
+#     # return result
+#     pages = [reading_session(i) for i in range(1, page + 1)]
+#     all_pages = list()
+#     for page in asyncio.as_completed(pages):
+#         result = all_pages.append(await page)
+#     return all_pages
 
 
 # if __name__ == "__main__":

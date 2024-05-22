@@ -15,4 +15,6 @@ class Book(Base):
     discount: Mapped[str] = mapped_column(String(20), nullable=True)
     rating: Mapped[float] = mapped_column(DECIMAL(4, 2), nullable=True)
     image: Mapped[str] = mapped_column(String(255))
-    history = relationship("History", back_populates="book")
+    history = relationship(
+        "History", back_populates="book", cascade="all, delete-orphan"
+    )
