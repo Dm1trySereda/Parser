@@ -1,4 +1,4 @@
-from fastapi import HTTPException, status
+from typing import Sequence
 from sqlalchemy import and_, func, select
 
 from src.models.history import History
@@ -11,30 +11,25 @@ class BaseRepository:
 
 class SearchHistory(BaseRepository):
 
-    async def select_book_history(
-        self, book_id: int = None, book_num: int = None, title: str = None
-    ) -> History:
+    async def select_history(self, **kwargs) -> History | Sequence[History] | None:
+
         select_values = list()
 
-        if book_id:
-            select_values.append(History.book_id == book_id)
-        if book_num:
-            select_values.append(History.book_num == book_num)
-        if title:
-            select_values.append(History.title.startswith(title))
-        if not select_values:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="You need to specify at least one parameter",
-            )
+        if kwargs.get("book_id"):
+            select_values.append(History.book_id == kwargs.get("book_id"))
+        if kwargs.get("book_num"):
+            select_values.append(History.book_num == kwargs.get("book_num"))
+        if kwargs.get("title"):
+            select_values.append(History.title.contains(kwargs.get("title")))
+        if kwargs.get("price_new"):
+            select_values.append(History.price == kwargs.get("price"))
         stmt = select(History).where(and_(*select_values))
         fetched_books = await self.async_session.execute(stmt)
-        books_history = fetched_books.scalars().all()
-        if len(books_history) <= 1:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="History not found"
-            )
-        return books_history
+        return (
+            fetched_books.scalars().first()
+            if kwargs.get("book_id") or kwargs.get("book_num") is not None
+            else fetched_books.scalars().all()
+        )
 
 
 class RepetitiveBook(BaseRepository):

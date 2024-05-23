@@ -1,35 +1,42 @@
-from typing import Sequence, List
+from typing import Sequence
 
-from fastapi import HTTPException, status
-from sqlalchemy import and_, asc, delete, desc, func, select, update
+from sqlalchemy import and_, asc, delete, desc, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.enums.book import SortChoices
 from src.models import Book
 from src.models.books import Book
-from src.enums.book import SortChoices
+from src.request_shemas.books import BookIn
+from src.response_schemas.books import BookOuts
 
 
 class BaseRepository:
     def __init__(self, session: AsyncSession):
         self.async_session = session
 
-    async def select_book(
-            self, book_id: int = None, book_num: int = None, title: str = None
-    ):
+    async def select_book(self, **kwargs) -> Book | Sequence[Book] | None:
         select_values = list()
 
-        if book_id:
-            select_values.append(Book.id == book_id)
-        if book_num:
-            select_values.append(Book.book_num == book_num)
-        if title:
-            select_values.append(Book.title.contains(title))
+        if kwargs.get("book_id"):
+            select_values.append(Book.id == kwargs.get("book_id"))
+        if kwargs.get("book_num"):
+            select_values.append(Book.book_num == kwargs.get("book_num"))
+        if kwargs.get("title"):
+            select_values.append(Book.title.contains(kwargs.get("title")))
+        if kwargs.get("price_new"):
+            select_values.append(Book.price_new == kwargs.get("price_new"))
+        if kwargs.get("price_old"):
+            select_values.append(Book.price_old == kwargs.get("price_old"))
+        if kwargs.get("discount"):
+            select_values.append(Book.discount == kwargs.get("discount"))
+        if kwargs.get("rating"):
+            select_values.append(Book.rating == kwargs.get("rating"))
 
         stmt = select(Book).where(and_(*select_values))
         fetched_books = await self.async_session.execute(stmt)
         return (
             fetched_books.scalars().first()
-            if book_id or book_num
+            if kwargs.get("book_id") or kwargs.get("book_num") is not None
             else fetched_books.scalars().all()
         )
 
@@ -39,7 +46,7 @@ class Paginate:
         self.async_session = session
 
     async def select_books(
-            self, page: int, books_quantity: int, sort_by: SortChoices, order_asc: bool
+        self, page: int, books_quantity: int, sort_by: SortChoices, order_asc: bool
     ) -> Sequence[Book]:
         books_quantity = books_quantity or 10
         books_offset = (page - 1) * books_quantity
@@ -56,7 +63,7 @@ class Paginate:
 
 class InsertBook(BaseRepository):
     async def insert_new_book(self, new_book: dict) -> Book | None:
-        current_book = await self.select_book(new_book.get("book_num"))
+        current_book = await self.select_book(book_num=new_book.get("book_num"))
         if current_book is None:
             new_book = Book(
                 book_num=new_book.get("book_num"),
@@ -110,31 +117,17 @@ class UpdateBook(BaseRepository):
             return None
 
 
-class DeleteEntity(BaseRepository):
-    def __init__(self, model, session):
-        super().__init__(session)
-        self.model = model
+class DeleteBook(BaseRepository):
 
-    async def delete(self, **kwargs):
-        stmt = delete(self.model).filter_by(
-            **{key: value for key, value in kwargs.items() if value}
-        )
-        current_book = await self.async_session.execute(stmt)
-        return current_book
-
-
-class DeleteBook(DeleteEntity):
-    def __init__(self, session):
-        super().__init__(Book, session)
-
-    async def delete_book(self, book_id=None, book_num=None) -> Book | None:
-        deleted_book = await self.select_book(book_id=book_id, book_num=book_num)
+    async def delete_book(self, **kwargs) -> Book | None:
+        deleted_book = await self.select_book(**kwargs)
         select_values = list()
-        if book_id:
-            select_values.append(Book.id == book_id)
-        if book_num:
-            select_values.append(Book.book_num == book_num)
+        if kwargs.get("book_id"):
+            select_values.append(Book.id == kwargs.get("book_id"))
+        if kwargs.get("book_num"):
+            select_values.append(Book.book_num == kwargs.get("book_num"))
 
-        await self.delete(book_id=book_id, book_num=book_num)
+        stmt = delete(Book).where(*select_values)
+        await self.async_session.execute(stmt)
 
-        return deleted_book if deleted_book is not None else None
+        return deleted_book

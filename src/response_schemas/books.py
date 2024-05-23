@@ -15,7 +15,7 @@ class BookOuts(BaseResponseModel):
     id: Annotated[int, Field(qe=1)]
     book_num: Annotated[int, Field(ge=1, example=123)]
     title: Annotated[str, Field(min_length=2, example="Something title")]
-    author: Annotated[str, Field(min_length=2, example="Something author")]
+    author: Annotated[str, Field(example="Something author")]
     price_new: Annotated[float, Field(ge=0, example=19.99)]
     price_old: Annotated[float | None, Field(ge=0, example=19.99)]
     discount: Annotated[str | None, Field(example="10%")] = None

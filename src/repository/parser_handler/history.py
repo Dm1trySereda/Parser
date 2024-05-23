@@ -1,9 +1,8 @@
 from sqlalchemy import exists, insert, select
 
-
 from src.models.books import Book
 from src.models.history import History
-from src.repositories.api_action.books import BaseRepository
+from src.repository.api_action.books import BaseRepository
 
 
 class HistoryRepository(BaseRepository):

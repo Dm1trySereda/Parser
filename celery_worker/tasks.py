@@ -5,13 +5,13 @@ from celery import chain, group
 from celery.schedules import crontab
 
 from celery_worker.config.celery_configs import parser
-from src.repositories.celery_handler.books import BaseHandler
+from src.repository.parser_handler.books import BaseHandler
 
 parser.conf.timezone = "Europe/Moscow"
 parser.conf.beat_schedule = {
     "run-every-10-minutes": {
         "task": "add_books_group",
-        "schedule": crontab(minute="*/10"),
+        "schedule": crontab(minute="*/1"),
     }
 }
 

@@ -8,9 +8,8 @@ Create Date: 2024-05-22 21:16:35.512023
 
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "b15c311dbc5a"
@@ -26,12 +25,8 @@ def upgrade() -> None:
         sa.Column("book_num", sa.BigInteger(), nullable=False),
         sa.Column("title", sa.String(length=255), nullable=False),
         sa.Column("author", sa.String(length=255), nullable=False),
-        sa.Column(
-            "price_new", sa.DECIMAL(precision=10, scale=2), nullable=True
-        ),
-        sa.Column(
-            "price_old", sa.DECIMAL(precision=10, scale=2), nullable=True
-        ),
+        sa.Column("price_new", sa.DECIMAL(precision=10, scale=2), nullable=True),
+        sa.Column("price_old", sa.DECIMAL(precision=10, scale=2), nullable=True),
         sa.Column("discount", sa.String(length=20), nullable=True),
         sa.Column("rating", sa.DECIMAL(precision=4, scale=2), nullable=True),
         sa.Column("image", sa.String(length=255), nullable=False),

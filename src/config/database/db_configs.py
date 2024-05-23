@@ -12,6 +12,7 @@ class ConfigDataBase(BaseSettings):
     MYSQL_PORT: str
     MYSQL_DATABASE: str
     DB_ECHO_LOG: bool = False
+
     # AUTH_SERVICE_URL: str
     # AUTH_SERVICE_API_KEY: str
 
