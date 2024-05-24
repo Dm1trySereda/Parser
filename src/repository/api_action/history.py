@@ -1,6 +1,7 @@
 from typing import Sequence
-from sqlalchemy import and_, func, select
+from sqlalchemy import and_, func, select, join
 
+from src.models.books import Book
 from src.models.history import History
 
 
@@ -21,15 +22,23 @@ class SearchHistory(BaseRepository):
             select_values.append(History.book_num == kwargs.get("book_num"))
         if kwargs.get("title"):
             select_values.append(History.title.contains(kwargs.get("title")))
-        if kwargs.get("price_new"):
+        if kwargs.get("price"):
             select_values.append(History.price == kwargs.get("price"))
+        if kwargs.get("author"):
+            stmt = (
+                select(History)
+                .select_from(join(History, Book, History.book_id == Book.id))
+                .where(
+                    (Book.author.contains(kwargs.get("author")))
+                    & (and_(*select_values))
+                )
+            )
+            fetched_books = await self.async_session.execute(stmt)
+            return fetched_books.scalars().all()
+
         stmt = select(History).where(and_(*select_values))
         fetched_books = await self.async_session.execute(stmt)
-        return (
-            fetched_books.scalars().first()
-            if kwargs.get("book_id") or kwargs.get("book_num") is not None
-            else fetched_books.scalars().all()
-        )
+        return fetched_books.scalars().all()
 
 
 class RepetitiveBook(BaseRepository):

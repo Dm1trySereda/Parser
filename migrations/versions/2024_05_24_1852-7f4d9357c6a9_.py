@@ -1,18 +1,19 @@
 """empty message
 
-Revision ID: b15c311dbc5a
+Revision ID: 7f4d9357c6a9
 Revises: 
-Create Date: 2024-05-22 21:16:35.512023
+Create Date: 2024-05-24 18:52:53.581842
 
 """
 
 from typing import Sequence, Union
 
-import sqlalchemy as sa
 from alembic import op
+import sqlalchemy as sa
+
 
 # revision identifiers, used by Alembic.
-revision: str = "b15c311dbc5a"
+revision: str = "7f4d9357c6a9"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -25,8 +26,12 @@ def upgrade() -> None:
         sa.Column("book_num", sa.BigInteger(), nullable=False),
         sa.Column("title", sa.String(length=255), nullable=False),
         sa.Column("author", sa.String(length=255), nullable=False),
-        sa.Column("price_new", sa.DECIMAL(precision=10, scale=2), nullable=True),
-        sa.Column("price_old", sa.DECIMAL(precision=10, scale=2), nullable=True),
+        sa.Column(
+            "price_new", sa.DECIMAL(precision=10, scale=2), nullable=True
+        ),
+        sa.Column(
+            "price_old", sa.DECIMAL(precision=10, scale=2), nullable=True
+        ),
         sa.Column("discount", sa.String(length=20), nullable=True),
         sa.Column("rating", sa.DECIMAL(precision=4, scale=2), nullable=True),
         sa.Column("image", sa.String(length=255), nullable=False),

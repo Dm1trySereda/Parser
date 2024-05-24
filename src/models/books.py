@@ -7,7 +7,7 @@ from .base import Base
 class Book(Base):
     __tablename__ = "books"
 
-    book_num: Mapped[int] = mapped_column(BigInteger)
+    book_num: Mapped[int] = mapped_column(BigInteger, unique=False)
     title: Mapped[str] = mapped_column(String(255))
     author: Mapped[str] = mapped_column(String(255))
     price_new: Mapped[float] = mapped_column(DECIMAL(10, 2), nullable=True)

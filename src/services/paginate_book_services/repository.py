@@ -13,4 +13,5 @@ class RepositoryPaginateBookService(AbstractPaginateBookService):
 
     async def paginate(self, **kwargs) -> Sequence[Book]:
         paginate_page = Paginate(self.session)
-        return await paginate_page.select_books(**kwargs)
+        page = await paginate_page.select_books(**kwargs)
+        return page.scalars().all()

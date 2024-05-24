@@ -82,19 +82,20 @@ async def search_books(
         ] = None,
         book_num: Annotated[int, Query(title="Search book for num", qe=100)] = None,
         title: Annotated[str, Query(title="Search book for title", min_length=3)] = None,
+        author: Annotated[str, Query(title="Search book for author", min_length=3)] = None,
 ) -> BookOuts | list[BookOuts]:
     search_service: AbstractSearchBookService = RepositorySearchBookService(
         request.state.db
     )
     try:
-        validate_parameters(book_id=book_id, bok_num=book_num, title=title)
+        validate_parameters(book_id=book_id, bok_num=book_num, title=title, author=author)
     except AttributeError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
         )
     search_result = await search_service.search(
-        book_id=book_id, book_num=book_num, title=title
+        book_id=book_id, book_num=book_num, title=title, author=author
     )
     try:
         validate_searcher(search_book=search_result)
@@ -177,13 +178,14 @@ async def change_book(request: Request, book: Annotated[BookIn, Body(embed=False
         request.state.db
     )
     history_handler = HistoryRepository(request.state.db)
-    book = await book_updater.update(book)
+
+    updated_book = await book_updater.update(book)
     try:
-        validate_inserter(book)
+        validate_inserter(updated_book)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     await history_handler.update_books_history()
-    return book
+    return updated_book
 
 
 @book_router.delete(

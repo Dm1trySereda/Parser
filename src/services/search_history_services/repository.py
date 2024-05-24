@@ -4,7 +4,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models import History
 from src.repository.api_action.history import SearchHistory
-from src.response_schemas.books import BookOuts
 from src.services.search_history_services.abc import AbstractSearchHistoryService
 
 
