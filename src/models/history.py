@@ -1,7 +1,7 @@
 from sqlalchemy import DECIMAL, BigInteger, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base
+from src.models.base import Base
 
 
 class History(Base):

@@ -65,6 +65,10 @@ services:
       target: fastapi-stage
     env_file:
       - ./.env
+    environment:
+      - SIGNATURE=${SIGNATURE}
+      - ALGORITHM=${ALGORITHM}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES}
     ports:
       - "8000:8000"
     volumes:

@@ -48,12 +48,12 @@ forbidden_words = [
 ]
 
 
-class BaseResponseModel(BaseModel):
+class BaseRequestModel(BaseModel):
     class Config:
         alias_generator = to_camel
 
 
-class BookIn(BaseResponseModel):
+class BookIn(BaseRequestModel):
     book_num: Annotated[int, Field(ge=1, example=123)]
     title: Annotated[str, Field(min_length=2, example="Something title")]
     author: Annotated[str, Field(min_length=2, example="Something author")]

@@ -3,5 +3,12 @@ docker cp dump_db_tables/history_dumps.sql parser-db_mysql-1:/history_dumps.sql
 
 
 loaddata
- mysql -u root -p library < books_dumps.sql
- mysql -u root -p library < history_dumps.sql
+ mysql -u root -p library < books_dump.sql
+ mysql -u root -p library < history_dump.sql
+
+dumpdata
+ mysql -u root -p library books > books_dump.sql
+ mysql -u root -p library history > history_dump.sql
+
+docker cp parser-db_mysql-1:/books_dumps.sql dump_db_tables/books_dumps.sql
+docker cp parser-db_mysql-1:/history_dump.sql dump_db_tables/history_dump.sql

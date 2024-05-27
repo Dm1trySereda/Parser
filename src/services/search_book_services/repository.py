@@ -2,7 +2,7 @@ from typing import Sequence
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models import Book
+from src.models.books import Book
 from src.repository.api_action.books import SelectBook
 from src.services.search_book_services.abc import AbstractSearchBookService
 
