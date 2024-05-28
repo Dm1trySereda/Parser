@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.users import User
 from src.response_schemas.users import UserInDBResponse
-from src.repository.api_action.users import GetCurrentUser, CreateNewUser
+from src.repository.users import GetCurrentUser, CreateNewUser
 from src.services.auth_services.abc import AbstractGetCurrentUserService
 
 

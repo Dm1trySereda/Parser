@@ -1,9 +1,7 @@
-from typing import Tuple
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models import Book
-from src.repository.api_action.books import InsertBook, UpdateBook, DeleteDuplicateBooks
+from src.repository.books import DeleteDuplicateBooks, InsertBook, UpdateBook
 from src.services.parser_services.abc import AbstractParserBookService
 from src.services.search_book_services.repository import RepositorySearchBookService
 
@@ -17,8 +15,8 @@ class RepositoryParserBookService(AbstractParserBookService):
         deleter_duplicate = DeleteDuplicateBooks(self.session)
         return await deleter_duplicate.remove_duplicates()
 
-    async def check_book(self, **kwargs: dict) -> Book | None:
-        return await self.search_service.search(book_num=kwargs.get("book_num"))
+    async def check_book(self, book_num: str) -> Book | None:
+        return await self.search_service.search(book_num=book_num)
 
     async def add_new_book(self, new_book: dict) -> Book | None:
         inserter = InsertBook(self.session)

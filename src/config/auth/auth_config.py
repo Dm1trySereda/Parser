@@ -1,5 +1,5 @@
-from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
+from pydantic_settings import BaseSettings
 
 
 class ConfigAuth(BaseSettings):
@@ -10,5 +10,3 @@ class ConfigAuth(BaseSettings):
 
 load_dotenv()
 settings_auth = ConfigAuth()
-
-

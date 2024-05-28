@@ -7,10 +7,10 @@ from src.models.base import Base
 class Book(Base):
     __tablename__ = "books"
 
-    book_num: Mapped[int] = mapped_column(BigInteger, unique=False)
+    book_num: Mapped[int] = mapped_column(BigInteger, unique=True)
     title: Mapped[str] = mapped_column(String(255))
     author: Mapped[str] = mapped_column(String(255))
-    price_new: Mapped[float] = mapped_column(DECIMAL(10, 2), nullable=True)
+    price_new: Mapped[float] = mapped_column(DECIMAL(10, 2))
     price_old: Mapped[float] = mapped_column(DECIMAL(10, 2), nullable=True)
     discount: Mapped[str] = mapped_column(String(20), nullable=True)
     rating: Mapped[float] = mapped_column(DECIMAL(4, 2), nullable=True)

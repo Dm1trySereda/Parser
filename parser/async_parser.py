@@ -15,6 +15,7 @@ async def reading_session(page):
 
 async def parsing_books(page, session):
     library = list()
+    book_nums = set()
     link = f"https://oz.by/books/?page={page}"
     try:
         async with session.get(link) as response:
@@ -51,8 +52,8 @@ async def parsing_books(page, session):
         book_discount = None
         if book_price_old:
             book_discount = (
-                str(round(100 - (float(book_price_new) * 100 / float(book_price_old))))
-                + "%"
+                    str(round(100 - (float(book_price_new) * 100 / float(book_price_old))))
+                    + "%"
             )
         book_image = validation(
             book_header.find("img", class_="product-card__cover-image"), is_image=True
@@ -68,7 +69,9 @@ async def parsing_books(page, session):
             "rating": book_rating,
             "image_url": book_image,
         }
-        library.append(book_data)
+        if book_data["book_num"] not in book_nums:
+            book_nums.add(book_data["book_num"])
+            library.append(book_data)
 
     return library
 
@@ -86,17 +89,7 @@ def validation(value, is_price=False, is_rating=False, is_image=False):
         return value
     return None
 
-
 #
-# async def start_reading(page):
-#     # result = await parsing_books(page, session)
-#     # return result
-#     pages = [reading_session(i) for i in range(1, page + 1)]
-#     all_pages = list()
-#     for page in asyncio.as_completed(pages):
-#         result = all_pages.append(await page)
-#     return all_pages
-
-
+#
 # if __name__ == "__main__":
-#     print(asyncio.run(reading_session(10)))
+#     print(asyncio.run(reading_session(50)))

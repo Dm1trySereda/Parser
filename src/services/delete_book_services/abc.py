@@ -5,5 +5,5 @@ from src.response_schemas.books import BookOuts
 
 class AbstractDeleteBookService(ABC):
     @abstractmethod
-    async def delete_book(self, **kwargs) -> BookOuts:
+    async def delete_book(self, current_book, **kwargs) -> BookOuts:
         pass
