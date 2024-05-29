@@ -1,18 +1,11 @@
 from fastapi import HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.services.paginate_services.repository import (
-    AbstractPaginateBookService,
-    RepositoryPaginateBookService,
-)
+from src.services.paginate_services.abc import AbstractPaginateBookService
 
 
 class PaginationFacade:
-    def __init__(self, session: AsyncSession):
-        self.session = session
-        self.pagination: AbstractPaginateBookService = RepositoryPaginateBookService(
-            session
-        )
+    def __init__(self, pagination_services: AbstractPaginateBookService):
+        self.pagination_services = pagination_services
 
     async def paginate(self, **kwargs):
         if not any(kwargs.values()):
@@ -20,7 +13,7 @@ class PaginationFacade:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="You need to specify at least one parameter",
             )
-        page = await self.pagination.paginate(**kwargs)
+        page = await self.pagination_services.paginate(**kwargs)
         if not page:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Page not found"

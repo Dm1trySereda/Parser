@@ -52,8 +52,8 @@ async def parsing_books(page, session):
         book_discount = None
         if book_price_old:
             book_discount = (
-                    str(round(100 - (float(book_price_new) * 100 / float(book_price_old))))
-                    + "%"
+                str(round(100 - (float(book_price_new) * 100 / float(book_price_old))))
+                + "%"
             )
         book_image = validation(
             book_header.find("img", class_="product-card__cover-image"), is_image=True
@@ -88,6 +88,7 @@ def validation(value, is_price=False, is_rating=False, is_image=False):
             value = value.get("src")
         return value
     return None
+
 
 #
 #

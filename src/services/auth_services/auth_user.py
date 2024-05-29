@@ -8,10 +8,11 @@ from jwt import InvalidTokenError
 from passlib.context import CryptContext
 
 from src.config.auth.auth_config import settings_auth
-from src.response_schemas.users import (TokenData, UserInDBResponse,
-                                        UserResponse)
+from src.response_schemas.users import TokenData, UserInDBResponse, UserResponse
 from src.services.auth_services.repository import (
-    AbstractGetCurrentUserService, RepositoryGetCurrentUserService)
+    AbstractGetCurrentUserService,
+    RepositoryGetCurrentUserService,
+)
 
 oauth2_scheme = HTTPBearer()
 
@@ -43,8 +44,8 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 # Checks the token and returns the user if it exists
 async def get_current_user(
-        request: Request,
-        token: Annotated[HTTPAuthorizationCredentials, Depends(oauth2_scheme)],
+    request: Request,
+    token: Annotated[HTTPAuthorizationCredentials, Depends(oauth2_scheme)],
 ):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -71,7 +72,7 @@ async def get_current_user(
 
 # Checks if the user is active
 async def get_current_active_user(
-        current_user: Annotated[UserResponse, Depends(get_current_user)],
+    current_user: Annotated[UserResponse, Depends(get_current_user)],
 ):
     current_user = await current_user
     if not current_user.is_active:

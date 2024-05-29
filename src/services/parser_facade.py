@@ -1,50 +1,35 @@
-from src.repository.history import UpdateHistory
-from src.request_shemas.books import BookIn
-from src.services.search_book_services.repository import RepositorySearchBookService, AbstractSearchBookService
-from src.services.add_new_book_services.repository import RepositoryAddNewBookService, AbstractAddNewBookService
-from src.services.update_book_services.repository import RepositoryUpdateBookService, AbstractUpdateBookService
-from src.config.database.db_helpers import db_helper
+from src.services.add_new_book_services.abc import AbstractAddNewBookService
+from src.services.search_book_services.abc import AbstractSearchBookService
+from src.services.update_book_services.abc import AbstractUpdateBookService
+from src.services.update_history_services.abc import AbstractUpdateHistoryService
 from sqlalchemy.exc import IntegrityError
+from src.request_shemas.parser_book import ParserBook
 
 
 class ParserHandler:
-    def __init__(self):
-        self.async_session = db_helper.get_db_session()
+    def __init__(
+            self,
+            search_services: AbstractSearchBookService,
+            update_services: AbstractUpdateBookService,
+            insert_services: AbstractAddNewBookService,
+            update_history_services: AbstractUpdateHistoryService,
 
-    async def process_books(self, pages: list):
-        if not pages:
-            raise ValueError("Page not found")
-        async with self.async_session as session:
-            book_searcher: AbstractSearchBookService = RepositorySearchBookService(session)
-            book_updater: AbstractUpdateBookService = RepositoryUpdateBookService(session)
-            book_inserter: AbstractAddNewBookService = RepositoryAddNewBookService(session)
-            for books in pages:
-                for book in books:
-                    try:
-                        current_books = await book_searcher.search(
-                            book_num=book.get("book_num")
-                        )
-                        if not current_books:
-                            await book_inserter.add_new_book(book)
-                        else:
-                            current_book = current_books[0]
-                            if float(current_book.price_new) != float(book.get("price_new")):
-                                await book_updater.update(current_book, book)
-                        await session.commit()
-                    except IntegrityError:
-                        await session.rollback()
+    ):
+        self.book_searcher = search_services
+        self.book_updater = update_services
+        self.book_inserter = insert_services
+        self.history_updater = update_history_services
+
+    async def process_books(self, book: ParserBook):
+        current_books = await self.book_searcher.search(
+            book_num=book.book_num
+        )
+        if not current_books:
+            await self.book_inserter.add_new_book(book)
+        else:
+            current_book = current_books[0]
+            if float(current_book.price_new) != float(book.price_new):
+                await self.book_updater.update(current_book, book)
 
     async def process_books_history(self):
-        async with self.async_session as session:
-            history_updater = UpdateHistory(session)
-            await history_updater.update_books_history()
-
-#
-# class DeleteDuplicateHandler(BaseHandler):
-#     async def remove_duplicates(self):
-#         async with self.get_async_session as async_session:
-#             book_handler: AbstractParserBookService = RepositoryParserBookService(
-#                 async_session
-#             )
-#             await book_handler.delete_duplicate()
-#             await async_session.commit()
+        await self.history_updater.update_history()

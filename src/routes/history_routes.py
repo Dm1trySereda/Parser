@@ -10,7 +10,6 @@ from src.services.search_history_services.repository import (
     RepositorySearchHistoryService,
 )
 
-
 history_routes = APIRouter(tags=["History"])
 
 #

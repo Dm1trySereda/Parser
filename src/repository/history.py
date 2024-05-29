@@ -1,6 +1,6 @@
 from typing import Sequence
 
-from sqlalchemy import and_, func, join, select, insert, exists
+from sqlalchemy import and_, exists, func, insert, join, select
 
 from src.models.books import Book
 from src.models.history import History

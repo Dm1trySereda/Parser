@@ -5,5 +5,5 @@ from src.response_schemas.books import BookOuts
 
 class AbstractSearchBookService(ABC):
     @abstractmethod
-    async def search(self, **kwargs) -> BookOuts | list[BookOuts]:
+    async def search(self, **kwargs) -> list[BookOuts]:
         pass

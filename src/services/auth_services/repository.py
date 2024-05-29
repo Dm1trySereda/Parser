@@ -3,8 +3,8 @@ from typing import Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.users import User
+from src.repository.users import CreateNewUser, GetCurrentUser
 from src.response_schemas.users import UserInDBResponse
-from src.repository.users import GetCurrentUser, CreateNewUser
 from src.services.auth_services.abc import AbstractGetCurrentUserService
 
 
@@ -21,7 +21,9 @@ class RepositoryGetCurrentUserService(AbstractGetCurrentUserService):
         current_user = await self.get_current_user(username=new_user.username)
         if current_user is None:
             inserter = CreateNewUser(self.session)
-            new_user_record = await inserter.create_new(new_user=new_user.model_dump(by_alias=False))
+            new_user_record = await inserter.create_new(
+                new_user=new_user.model_dump(by_alias=False)
+            )
             await self.session.flush([new_user_record])
             await self.session.refresh(new_user_record)
             return new_user_record

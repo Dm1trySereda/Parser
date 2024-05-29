@@ -1,18 +1,17 @@
 from fastapi import HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.services.search_book_services.repository import (
-    AbstractSearchBookService,
-    RepositorySearchBookService,
-)
-from src.services.delete_book_services.repository import RepositoryDeleteBookService, AbstractDeleteBookService
+from src.services.delete_book_services.abc import AbstractDeleteBookService
+from src.services.search_book_services.abc import AbstractSearchBookService
 
 
 class DeleteBookFacade:
-    def __init__(self, session: AsyncSession):
-        self.session = session
-        self.book_searcher: AbstractSearchBookService = RepositorySearchBookService(session)
-        self.book_deleter: AbstractDeleteBookService = RepositoryDeleteBookService(session)
+    def __init__(
+        self,
+        search_services: AbstractSearchBookService,
+        delete_services: AbstractDeleteBookService,
+    ):
+        self.book_searcher = search_services
+        self.book_deleter = delete_services
 
     async def delete_book(self, **kwargs):
         if not any(kwargs.values()):

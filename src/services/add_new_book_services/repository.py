@@ -14,10 +14,12 @@ class RepositoryAddNewBookService(AbstractAddNewBookService):
         self.inserter = InsertBook(session)
 
     async def add_new_book(self, new_book: BookIn | dict) -> Book | Any:
-        if isinstance(new_book, dict):
-            return await self.inserter.insert_new_book(new_book)
-        else:
-            new_book_record = await self.inserter.insert_new_book(
-                new_book=new_book.model_dump(by_alias=False)
-            )
-            return new_book_record
+        # if isinstance(new_book, dict):
+        #     return await self.inserter.insert_new_book(new_book)
+        # else:
+        new_book_record = await self.inserter.insert_new_book(
+            new_book=new_book.model_dump(by_alias=False)
+        )
+        await self.session.flush([new_book_record])
+        await self.session.refresh(new_book_record)
+        return new_book_record

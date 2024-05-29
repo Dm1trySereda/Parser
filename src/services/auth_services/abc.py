@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.response_schemas.users import UserResponse, UserInDBResponse
+from src.response_schemas.users import UserInDBResponse, UserResponse
 
 
 class AbstractGetCurrentUserService(ABC):

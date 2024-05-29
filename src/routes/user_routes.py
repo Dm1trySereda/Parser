@@ -17,7 +17,6 @@ from src.services.auth_services.repository import (
     RepositoryGetCurrentUserService,
 )
 
-
 user_routes = APIRouter(tags=["Users"])
 
 

@@ -2,7 +2,7 @@ import re
 from typing import Annotated, Optional
 
 from pydantic import BaseModel, Field, HttpUrl, field_validator
-from pydantic.alias_generators import to_camel
+from pydantic.alias_generators import to_camel, to_snake
 
 forbidden_words = [
     "Говно",
@@ -58,10 +58,10 @@ class BookIn(BaseRequestModel):
     title: Annotated[str, Field(min_length=2, example="Something title")]
     author: Annotated[str, Field(min_length=2, example="Something author")]
     price_new: Annotated[float, Field(ge=0, example=19.99)]
-    price_old: Annotated[float | None, Field(ge=0)] = None
-    discount: Annotated[str | None, Field(min_length=2, max_length=4)] = None
-    rating: Optional[float] = Field(None, ge=0, le=5, example=4.5)
-    image_url: Optional[HttpUrl] = Field(None)
+    price_old: Annotated[float | None, Field(ge=0, example=17.99)] = None
+    discount: Annotated[str | None, Field(min_length=2, max_length=4, example="10%")] = None
+    rating: Annotated[float | None, Field(ge=0, le=5, example=4.5)] = None
+    image_url: Annotated[HttpUrl, Field()] = None
 
     @field_validator("title", "author")
     @classmethod
@@ -73,7 +73,7 @@ class BookIn(BaseRequestModel):
     @field_validator("title", "author")
     @classmethod
     def no_special_symbols(cls, value):
-        if not re.match(r"^[a-zA-Zа-яА-Я0-9\s()'\"]*$", value):
+        if not re.match(r"^[a-zA-Zа-яА-Я0-9\s(),'\"]*$", value):
             raise ValueError("Field cannot contain special symbols")
         return value
 
@@ -84,3 +84,5 @@ class BookIn(BaseRequestModel):
         if new_value != value:
             raise ValueError("Field contains extra spaces")
         return new_value
+
+

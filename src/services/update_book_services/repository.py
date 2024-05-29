@@ -12,13 +12,13 @@ class RepositoryUpdateBookService(AbstractUpdateBookService):
         self.book_updater = UpdateBook(session)
 
     async def update(self, current_book, book: BookIn | dict) -> Book | None:
-        if isinstance(book, dict):
-            return await self.book_updater.update_book(
-                current_book=current_book, book=book
-            )
-        else:
-            updated_book = await self.book_updater.update_book(
-                current_book=current_book, book=book.dict(by_alias=False)
-            )
-            await self.session.refresh(updated_book)
-            return updated_book
+        # if isinstance(book, dict):
+        #     return await self.book_updater.update_book(
+        #         current_book=current_book, book=book
+        #     )
+        # else:
+        updated_book = await self.book_updater.update_book(
+            current_book=current_book, book=book.dict(by_alias=False)
+        )
+        await self.session.refresh(updated_book)
+        return updated_book
