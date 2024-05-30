@@ -23,8 +23,6 @@ class SearchHistory(BaseRepository):
             select_values.append(History.book_num == kwargs.get("book_num"))
         if kwargs.get("title"):
             select_values.append(History.title.contains(kwargs.get("title")))
-        if kwargs.get("price"):
-            select_values.append(History.price == kwargs.get("price"))
         if kwargs.get("author"):
             stmt = (
                 select(History)

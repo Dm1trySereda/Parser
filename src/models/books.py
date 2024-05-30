@@ -1,4 +1,6 @@
-from sqlalchemy import DECIMAL, BigInteger, String
+from datetime import datetime
+
+from sqlalchemy import DECIMAL, TIMESTAMP, BigInteger, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base
@@ -6,7 +8,11 @@ from src.models.base import Base
 
 class Book(Base):
     __tablename__ = "books"
-
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow
+    )
     book_num: Mapped[int] = mapped_column(BigInteger, unique=True)
     title: Mapped[str] = mapped_column(String(255))
     author: Mapped[str] = mapped_column(String(255))

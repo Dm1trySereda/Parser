@@ -7,15 +7,11 @@ from fastapi.security import OAuth2PasswordRequestForm
 from src.config.auth.auth_config import settings_auth
 from src.request_shemas.users import UserRequest
 from src.response_schemas.users import Token, UserResponse
-from src.services.auth_services.auth_user import (
-    authenticate_user,
-    create_access_token,
-    get_current_active_user,
-)
+from src.services.auth_services.auth_user import (authenticate_user,
+                                                  create_access_token,
+                                                  get_current_active_user)
 from src.services.auth_services.repository import (
-    AbstractGetCurrentUserService,
-    RepositoryGetCurrentUserService,
-)
+    AbstractGetCurrentUserService, RepositoryGetCurrentUserService)
 
 user_routes = APIRouter(tags=["Users"])
 

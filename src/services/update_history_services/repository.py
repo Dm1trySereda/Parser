@@ -1,7 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.repository.history import UpdateHistory
-from src.services.update_history_services.abc import AbstractUpdateHistoryService
+from src.services.update_history_services.abc import \
+    AbstractUpdateHistoryService
 
 
 class RepositoryUpdateHistoryService(AbstractUpdateHistoryService):

@@ -99,3 +99,18 @@ async def authenticate_user(request: Request, username: str, password: str):
     if not verify_password(password, user.hashed_password):
         return False
     return user
+
+
+from abc import ABC, abstractmethod
+
+from src.response_schemas.users import UserInDBResponse, UserResponse
+
+
+class AbstractGetCurrentUserService(ABC):
+    @abstractmethod
+    async def get_current_user(self, username: str) -> UserInDBResponse:
+        pass
+
+    @abstractmethod
+    async def create_user(self, new_user: dict) -> UserResponse:
+        pass

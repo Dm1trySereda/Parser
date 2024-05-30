@@ -2,7 +2,8 @@ from typing import Sequence
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models import Book
+from src.enums.book import SortChoices
+from src.models.books import Book
 from src.repository.books import Paginate
 from src.services.paginate_services.abc import AbstractPaginateBookService
 
@@ -12,6 +13,14 @@ class RepositoryPaginateBookService(AbstractPaginateBookService):
         self.session = session
         self.paginate_instance = Paginate(session)
 
-    async def paginate(self, **kwargs) -> Sequence[Book]:
-        page = await self.paginate_instance.select_books(**kwargs)
-        return page.scalars().all()
+    async def paginate(
+        self,
+        page: int = None,
+        books_quantity: int = None,
+        sort_by: SortChoices = None,
+        order_asc: bool = None,
+    ) -> Sequence[Book]:
+        books_on_page = await self.paginate_instance.select_books(
+            page, books_quantity, sort_by, order_asc
+        )
+        return books_on_page.scalars().all()

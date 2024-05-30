@@ -1,29 +1,29 @@
 import asyncio
-
-from pydantic import ValidationError
-
 from parser.async_parser import reading_session
 
 from celery import chain, group
 from celery.schedules import crontab
+from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError
 
 from celery_worker.config.celery_configs import parser
 from src.config.database.db_helpers import db_helper
-from src.services.add_new_book_services.repository import RepositoryAddNewBookService
-from src.services.parser_facade import ParserHandler
-from src.services.search_book_services.repository import RepositorySearchBookService
-from src.services.update_book_services.repository import RepositoryUpdateBookService
-from src.services.update_history_services.repository import (
-    RepositoryUpdateHistoryService,
-)
 from src.request_shemas.parser_book import ParserBook
+from src.services.add_new_book_services.repository import \
+    RepositoryAddNewBookService
+from src.services.parser_facade import ParserHandler
+from src.services.search_book_services.repository import \
+    RepositorySearchBookService
+from src.services.update_book_services.repository import \
+    RepositoryUpdateBookService
+from src.services.update_history_services.repository import \
+    RepositoryUpdateHistoryService
 
 parser.conf.timezone = "Europe/Moscow"
 parser.conf.beat_schedule = {
     "run-every-10-minutes": {
         "task": "add_books_group",
-        "schedule": crontab(minute="*/1"),
+        "schedule": crontab(minute="*/10"),
     }
 }
 

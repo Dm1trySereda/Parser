@@ -1,8 +1,11 @@
+from typing import Tuple
+
 from sqlalchemy import Result, and_, asc, delete, desc, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.enums.book import SortChoices
 from src.models.books import Book
+from src.models.history import History
 
 
 class BaseRepository:
@@ -37,12 +40,10 @@ class SelectBook(BaseRepository):
         return await self.async_session.execute(stmt)
 
 
-class Paginate:
-    def __init__(self, session: AsyncSession):
-        self.async_session = session
+class Paginate(BaseRepository):
 
     async def select_books(
-        self, page: int, books_quantity: int, sort_by: SortChoices, order_asc: bool
+            self, page: int, books_quantity: int, sort_by: SortChoices, order_asc: bool
     ) -> Result[tuple[Book]]:
         books_quantity = books_quantity or 10
         books_offset = (page - 1) * books_quantity
@@ -57,7 +58,7 @@ class Paginate:
 
 
 class InsertBook(BaseRepository):
-    async def insert_new_book(self, new_book: dict):
+    async def insert_new_book(self, new_book: dict) -> Book:
         new_book = Book(
             book_num=new_book.get("book_num"),
             title=new_book.get("title"),
@@ -73,7 +74,7 @@ class InsertBook(BaseRepository):
 
 
 class UpdateBook(BaseRepository):
-    async def update_book(self, current_book: Book, book: dict):
+    async def update_book(self, existing_book: Book, book: dict):
         update_values = {
             "title": book.get("title"),
             "author": book.get("author"),
@@ -84,7 +85,7 @@ class UpdateBook(BaseRepository):
         new_price = book.get("price_new")
         if new_price:
             new_price = float(new_price)
-            old_price = float(current_book.price_new)
+            old_price = float(existing_book.price_new)
             update_values["price_new"] = new_price
             update_values["price_old"] = old_price
             update_values["discount"] = (
@@ -97,7 +98,7 @@ class UpdateBook(BaseRepository):
             .values(**update_values)
         )
         await self.async_session.execute(stmt)
-        return current_book
+        return existing_book
 
 
 class DeleteBook(BaseRepository):
@@ -112,28 +113,3 @@ class DeleteBook(BaseRepository):
         stmt = delete(Book).where(*select_values)
         await self.async_session.execute(stmt)
         return current_book
-
-
-class DeleteDuplicateBooks(BaseRepository):
-
-    async def remove_duplicates(self):
-        select_all = select(Book)
-        result_all = await self.async_session.execute(select_all)
-        all_books = result_all.scalars().all()
-
-        book_counts = {}
-
-        for book in all_books:
-            if book.book_num in book_counts:
-                book_counts[book.book_num] += 1
-            else:
-                book_counts[book.book_num] = 1
-        for book_num, count in book_counts.items():
-            if count > 1:
-                duplicates_query = select(Book).where(Book.book_num == book_num)
-                result_duplicates = await self.async_session.execute(duplicates_query)
-                duplicates = result_duplicates.scalars().all()
-
-                for duplicate in duplicates[1:]:
-                    stmt = delete(Book).where(Book.id == duplicate.id)
-                    await self.async_session.execute(stmt)

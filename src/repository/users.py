@@ -27,10 +27,9 @@ class CreateNewUser(BaseRepository):
     async def create_new(self, new_user: dict):
         new_user = User(
             username=new_user.get("username"),
+            hashed_password=pwd_context.hash(new_user.get("hashed_password")),
             full_name=new_user.get("full_name"),
             email=new_user.get("email"),
-            hashed_password=pwd_context.hash(new_user.get("hashed_password")),
-            is_active=new_user.get("is_active"),
         )
         self.async_session.add(new_user)
         return new_user

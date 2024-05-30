@@ -1,5 +1,3 @@
-from typing import Any
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.books import Book
@@ -13,10 +11,7 @@ class RepositoryAddNewBookService(AbstractAddNewBookService):
         self.session = session
         self.inserter = InsertBook(session)
 
-    async def add_new_book(self, new_book: BookIn | dict) -> Book | Any:
-        # if isinstance(new_book, dict):
-        #     return await self.inserter.insert_new_book(new_book)
-        # else:
+    async def add_new_book(self, new_book: BookIn) -> Book:
         new_book_record = await self.inserter.insert_new_book(
             new_book=new_book.model_dump(by_alias=False)
         )

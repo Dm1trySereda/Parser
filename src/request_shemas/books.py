@@ -59,30 +59,24 @@ class BookIn(BaseRequestModel):
     author: Annotated[str, Field(min_length=2, example="Something author")]
     price_new: Annotated[float, Field(ge=0, example=19.99)]
     price_old: Annotated[float | None, Field(ge=0, example=17.99)] = None
-    discount: Annotated[str | None, Field(min_length=2, max_length=4, example="10%")] = None
+    discount: Annotated[
+        str | None, Field(min_length=2, max_length=4, example="10%")
+    ] = None
     rating: Annotated[float | None, Field(ge=0, le=5, example=4.5)] = None
     image_url: Annotated[HttpUrl, Field()] = None
 
     @field_validator("title", "author")
     @classmethod
-    def no_forbidden_words(cls, value):
+    def validate(cls, value):
+
         if any(word.lower() in value for word in forbidden_words):
-            raise ValueError("Field contains forbidden words")
-        return value
+            raise ValueError("The field contains forbidden words.")
 
-    @field_validator("title", "author")
-    @classmethod
-    def no_special_symbols(cls, value):
         if not re.match(r"^[a-zA-Zа-яА-Я0-9\s(),'\"]*$", value):
-            raise ValueError("Field cannot contain special symbols")
-        return value
+            raise ValueError("The field cannot contain special symbols.")
 
-    @field_validator("title", "author")
-    @classmethod
-    def no_extra_spaces(cls, value):
         new_value = " ".join(value.split())
         if new_value != value:
-            raise ValueError("Field contains extra spaces")
+            raise ValueError("The field contains extra spaces.")
+
         return new_value
-
-

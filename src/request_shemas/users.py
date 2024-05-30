@@ -13,21 +13,21 @@ class BaseRequestModel(BaseModel):
 
 class UserRequest(BaseRequestModel):
     username: Annotated[str, Field(min_length=2)]
-    email: Annotated[EmailStr | None, Field(min_length=5)] = None
-    full_name: Annotated[str | None, Field(min_length=2)] = None
-    is_active: Annotated[bool | None, Field()] = None
     hashed_password: Annotated[str, Field(min_length=2)]
+    full_name: Annotated[str | None, Field(min_length=2)] = None
+    email: Annotated[EmailStr | None, Field(min_length=5)] = None
+
 
     @field_validator("username")
     @classmethod
-    def no_special_symbols(cls, value):
+    def no_special_symbols_username(cls, value):
         if not re.match(r"^[a-zA-Zа-яА-Я0-9_-]*$", value):
             raise ValueError("Field cannot contain special symbols")
         return value
 
     @field_validator("full_name")
     @classmethod
-    def no_special_symbols(cls, value):
+    def no_special_symbols_full_name(cls, value):
         if not re.match(r"^[a-zA-Zа-яА-Я\s-]*$", value):
             raise ValueError("Field cannot contain special symbols")
         return value
