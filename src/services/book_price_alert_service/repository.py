@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.enums.book import SortChoices
 from src.models.history import History
 from src.repository.history import RepetitiveBook
-from src.services.book_price_alert_services.abc import \
+from src.services.book_price_alert_service.abc import \
     AbstractBookPriceAlertService
 
 

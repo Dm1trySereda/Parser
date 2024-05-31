@@ -12,13 +12,11 @@ class BaseRepository:
         self.async_session = session
 
 
-class GetCurrentUser(BaseRepository):
-    async def get_user(self, **kwargs):
+class SearchUser(BaseRepository):
+    async def get_user(self, username: str):
         select_values = list()
-        if kwargs.get("username"):
-            select_values.append(User.username == kwargs.get("username"))
-        if kwargs.get("full_name"):
-            select_values.append((User.full_name == kwargs.get("full_name")))
+        if username:
+            select_values.append(User.username == username)
         stmt = select(User).where(*select_values)
         return await self.async_session.execute(stmt)
 

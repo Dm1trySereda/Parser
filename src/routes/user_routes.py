@@ -1,61 +1,53 @@
-from datetime import timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Request, status
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter, Body, Depends, Request, status
+from fastapi.security import HTTPBasicCredentials
 
-from src.config.auth.auth_config import settings_auth
 from src.request_shemas.users import UserRequest
-from src.response_schemas.users import Token, UserResponse
-from src.services.auth_services.auth_user import (authenticate_user,
-                                                  create_access_token,
-                                                  get_current_active_user)
-from src.services.auth_services.repository import (
-    AbstractGetCurrentUserService, RepositoryGetCurrentUserService)
+from src.response_schemas.users import UserInDBResponse, UserResponse
+from src.services.auth_services.repository import RepositoryAuthUserService
+from src.services.authentication_faсade import AuthenticateUserFacade
+from src.services.authorization_facade import verify_user_is_active
+from src.services.create_token_service.repository import RepositoryCreateTokenService
+from src.services.get_user_in_db_service.repository import RepositoryGetUserService
+from src.services.registration_user_faсade import RegistrationUserFacade
+from src.services.registration_user_service.repository import (
+    RepositoryRegistrationUserService,
+)
 
 user_routes = APIRouter(tags=["Users"])
 
 
-@user_routes.post("/login")
+@user_routes.post("/authentication")
 async def login(
-    request: Request, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+        request: Request, form_data: Annotated[HTTPBasicCredentials, Depends()]
 ):
-    user = await authenticate_user(request, form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token_expires = timedelta(minutes=settings_auth.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
+    auth_facade = AuthenticateUserFacade(
+        auth_service=RepositoryAuthUserService(request.state.db),
+        create_token_service=RepositoryCreateTokenService(),
     )
-    return Token(access_token=access_token, token_type="bearer")
-
-
-@user_routes.get("/users/me")
-async def read_users_me(
-    current_user: Annotated[UserResponse, Depends(get_current_active_user)]
-):
-    return current_user
+    return await auth_facade.authentication(form_data)
 
 
 @user_routes.post(
     "/registration",
     status_code=status.HTTP_201_CREATED,
-    response_model=UserResponse,
+    response_model=UserInDBResponse,
     response_description="User created",
 )
-async def registration(
-    request: Request, new_user: Annotated[UserRequest, Body(embed=False)]
-):
-    user_inserter: AbstractGetCurrentUserService = RepositoryGetCurrentUserService(
-        request.state.db
+async def registration(request: Request, new_user: Annotated[UserRequest, Depends()]):
+    regis_facade = RegistrationUserFacade(
+        search_services=RepositoryGetUserService(request.state.db),
+        registration_services=RepositoryRegistrationUserService(request.state.db),
     )
-    new_user = await user_inserter.create_user(new_user)
-    # try:
-    #     validate_inserter(new_user)
-    # except ValueError as e:
-    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    return new_user
+
+    return await regis_facade.registration_user(new_user)
+
+
+@user_routes.get(
+    "/users/about_me", status_code=status.HTTP_200_OK, response_model=UserResponse
+)
+async def read_users_me(
+        current_user: Annotated[UserResponse, Depends(verify_user_is_active)]
+):
+    return current_user

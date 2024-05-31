@@ -1,10 +1,8 @@
 from fastapi import HTTPException, status
 
 from src.enums.book import SortChoices
-from src.models.books import Book
-from src.models.history import History
 from src.response_schemas.books import BookOuts
-from src.services.paginate_services.abc import AbstractPaginateBookService
+from src.services.paginate_service.abc import AbstractPaginateBookService
 
 
 class PaginationFacade:

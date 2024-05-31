@@ -2,16 +2,13 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, status
 from starlette.requests import Request
-
-from src.enums.book import SortChoices
-from src.repository.history import RepetitiveBook
 from src.response_schemas.history import HistoryOut
 from src.response_schemas.users import UserResponse
-from src.services.auth_services.auth_user import get_current_active_user
-from src.services.book_price_alert_services.repository import \
+from src.services.authorization_facade import verify_user_is_active
+from src.services.book_price_alert_service.repository import \
     RepositoryBookPriceAlertService
-from src.services.search_history_fasade import HistorySearchFacadeServices
-from src.services.search_history_services.repository import \
+from src.services.search_history_faсade import HistorySearchFacadeServices
+from src.services.search_history_service.repository import \
     RepositorySearchHistoryService
 
 history_routes = APIRouter(tags=["History"])
@@ -46,7 +43,7 @@ async def show_history(
 )
 async def get_history_for_book(
         request: Request,
-        current_user: Annotated[UserResponse, Depends(get_current_active_user)],
+        current_user: Annotated[UserResponse, Depends(verify_user_is_active)],
         book_id: Annotated[int, Query(title="Search book for id in db", qe=1)] = None,
         book_num: Annotated[int, Query(title="Search book for num", qe=100)] = None,
         title: Annotated[str, Query(title="Search book for title", min_length=3)] = None,

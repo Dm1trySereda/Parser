@@ -1,9 +1,9 @@
 from fastapi import HTTPException, status
 
 from src.response_schemas.history import HistoryOut
-from src.services.book_price_alert_services.abc import \
+from src.services.book_price_alert_service.abc import \
     AbstractBookPriceAlertService
-from src.services.search_history_services.abc import \
+from src.services.search_history_service.abc import \
     AbstractSearchHistoryService
 
 

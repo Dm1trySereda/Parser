@@ -4,27 +4,26 @@ from fastapi import APIRouter, Body, Depends, Query, status
 from starlette.requests import Request
 
 from src.enums.book import SortChoices
-from src.models.books import Book
 from src.request_shemas.books import BookIn
 from src.response_schemas.books import BookOuts
 from src.response_schemas.users import UserResponse
 from src.services.add_new_book_facade import AddNewBookFacade
-from src.services.add_new_book_services.repository import \
+from src.services.add_new_book_service.repository import \
     RepositoryAddNewBookService
-from src.services.auth_services.auth_user import get_current_active_user
-from src.services.delete_book_fasade import DeleteBookFacade
-from src.services.delete_book_services.repository import \
+from src.services.authorization_facade import verify_user_is_active
+from src.services.delete_book_faсade import DeleteBookFacade
+from src.services.delete_book_service.repository import \
     RepositoryDeleteBookService
 from src.services.paginate_facade import PaginationFacade
-from src.services.paginate_services.repository import \
+from src.services.paginate_service.repository import \
     RepositoryPaginateBookService
 from src.services.search_book_facade import BookSearchFacadeServices
-from src.services.search_book_services.repository import \
+from src.services.search_book_service.repository import \
     RepositorySearchBookService
 from src.services.update_book_facade import UpdateBookFacade
-from src.services.update_book_services.repository import \
+from src.services.update_book_service.repository import \
     RepositoryUpdateBookService
-from src.services.update_history_services.repository import \
+from src.services.update_history_service.repository import \
     RepositoryUpdateHistoryService
 
 book_router = APIRouter(tags=["Books"])
@@ -38,7 +37,7 @@ book_router = APIRouter(tags=["Books"])
 )
 async def search_books(
         request: Request,
-        current_user: Annotated[UserResponse, Depends(get_current_active_user)],
+        current_user: Annotated[UserResponse, Depends(verify_user_is_active)],
         book_id: Annotated[
             int, Query(alias="id", title="Search book for id in db", qe=1)
         ] = None,
@@ -61,7 +60,7 @@ async def search_books(
 )
 async def get_books_on_page(
         request: Request,
-        current_user: Annotated[UserResponse, Depends(get_current_active_user)],
+        current_user: Annotated[UserResponse, Depends(verify_user_is_active)],
         page: Annotated[int, Query(qe=1)] = 1,
         books_quantity: Annotated[int, Query(qe=10)] = None,
         sort_by: Annotated[SortChoices, Query()] = SortChoices.title,
@@ -83,7 +82,7 @@ async def get_books_on_page(
 )
 async def add_book(
         request: Request,
-        current_user: Annotated[UserResponse, Depends(get_current_active_user)],
+        current_user: Annotated[UserResponse, Depends(verify_user_is_active)],
         new_book: Annotated[BookIn, Body(embed=False)],
 ):
     book_inserter = AddNewBookFacade(
@@ -103,7 +102,7 @@ async def add_book(
 )
 async def change_book(
         request: Request,
-        current_user: Annotated[UserResponse, Depends(get_current_active_user)],
+        current_user: Annotated[UserResponse, Depends(verify_user_is_active)],
         book: Annotated[BookIn, Body(embed=False)],
 ):
     book_updater = UpdateBookFacade(
@@ -123,7 +122,7 @@ async def change_book(
 )
 async def delete_book(
         request: Request,
-        current_user: Annotated[UserResponse, Depends(get_current_active_user)],
+        current_user: Annotated[UserResponse, Depends(verify_user_is_active)],
         book_id: Annotated[int, Query(qe=1)] = None,
         book_num: Annotated[int, Query(qe=100)] = None,
 ):

@@ -1,8 +1,6 @@
 from abc import abstractmethod, ABC
 from datetime import timedelta
 
-from src.response_schemas.users import UserInDBResponse
-
 
 class AbstractCreateTokenService(ABC):
     @abstractmethod

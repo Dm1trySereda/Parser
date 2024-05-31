@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models import Book
 from src.repository.books import DeleteBook
-from src.services.delete_book_services.abc import AbstractDeleteBookService
+from src.services.delete_book_service.abc import AbstractDeleteBookService
 
 
 class RepositoryDeleteBookService(AbstractDeleteBookService):

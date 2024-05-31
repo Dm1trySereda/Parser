@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.books import Book
 from src.repository.books import SelectBook
-from src.services.search_book_services.abc import AbstractSearchBookService
+from src.services.search_book_service.abc import AbstractSearchBookService
 
 
 class RepositorySearchBookService(AbstractSearchBookService):

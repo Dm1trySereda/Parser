@@ -1,9 +1,7 @@
-from typing import List
-
 from fastapi import HTTPException, status
 
 from src.response_schemas.books import BookOuts
-from src.services.search_book_services.abc import AbstractSearchBookService
+from src.services.search_book_service.abc import AbstractSearchBookService
 
 
 class BookSearchFacadeServices:

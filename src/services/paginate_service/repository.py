@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.enums.book import SortChoices
 from src.models.books import Book
 from src.repository.books import Paginate
-from src.services.paginate_services.abc import AbstractPaginateBookService
+from src.services.paginate_service.abc import AbstractPaginateBookService
 
 
 class RepositoryPaginateBookService(AbstractPaginateBookService):

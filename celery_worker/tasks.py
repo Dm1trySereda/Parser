@@ -9,15 +9,13 @@ from sqlalchemy.exc import IntegrityError
 from celery_worker.config.celery_configs import parser
 from src.config.database.db_helpers import db_helper
 from src.request_shemas.parser_book import ParserBook
-from src.services.add_new_book_services.repository import \
-    RepositoryAddNewBookService
+from src.services.add_new_book_service.repository import RepositoryAddNewBookService
 from src.services.parser_facade import ParserHandler
-from src.services.search_book_services.repository import \
-    RepositorySearchBookService
-from src.services.update_book_services.repository import \
-    RepositoryUpdateBookService
-from src.services.update_history_services.repository import \
-    RepositoryUpdateHistoryService
+from src.services.search_book_service.repository import RepositorySearchBookService
+from src.services.update_book_service.repository import RepositoryUpdateBookService
+from src.services.update_history_service.repository import (
+    RepositoryUpdateHistoryService,
+)
 
 parser.conf.timezone = "Europe/Moscow"
 parser.conf.beat_schedule = {
@@ -87,7 +85,8 @@ def add_books_history() -> None:
 def add_books_group():
     global current_range_start
     read_tasks = group(
-        reading_pages.s(i) for i in range(current_range_start, current_range_start + 100)
+        reading_pages.s(i)
+        for i in range(current_range_start, current_range_start + 100)
     )
     write_tasks_chain = chain(
         read_tasks, create_or_update_books.s(), add_books_history.si()

@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.models.books import Book
 from src.repository.books import InsertBook
 from src.request_shemas.books import BookIn
-from src.services.add_new_book_services.abc import AbstractAddNewBookService
+from src.services.add_new_book_service.abc import AbstractAddNewBookService
 
 
 class RepositoryAddNewBookService(AbstractAddNewBookService):

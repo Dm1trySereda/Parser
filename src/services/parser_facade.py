@@ -1,10 +1,10 @@
 from sqlalchemy.exc import IntegrityError
 
 from src.request_shemas.parser_book import ParserBook
-from src.services.add_new_book_services.abc import AbstractAddNewBookService
-from src.services.search_book_services.abc import AbstractSearchBookService
-from src.services.update_book_services.abc import AbstractUpdateBookService
-from src.services.update_history_services.abc import \
+from src.services.add_new_book_service.abc import AbstractAddNewBookService
+from src.services.search_book_service.abc import AbstractSearchBookService
+from src.services.update_book_service.abc import AbstractUpdateBookService
+from src.services.update_history_service.abc import \
     AbstractUpdateHistoryService
 
 

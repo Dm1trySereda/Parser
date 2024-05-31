@@ -1,13 +1,12 @@
 from abc import ABC, abstractmethod
 
-from src.response_schemas.users import UserInDBResponse, UserResponse
+from fastapi import Request
+
+from src.response_schemas.users import UserInDBResponse
 
 
-class AbstractGetCurrentUserService(ABC):
+class AbstractAuthUserService(ABC):
+
     @abstractmethod
-    async def get_current_user(self, username: str) -> UserInDBResponse:
-        pass
-
-    @abstractmethod
-    async def create_user(self, new_user: dict) -> UserResponse:
+    async def authenticate_user(self, username: str, password: str):
         pass

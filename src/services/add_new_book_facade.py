@@ -2,9 +2,9 @@ from fastapi import HTTPException, status
 
 from src.request_shemas.books import BookIn
 from src.response_schemas.books import BookOuts
-from src.services.add_new_book_services.abc import AbstractAddNewBookService
-from src.services.search_book_services.abc import AbstractSearchBookService
-from src.services.update_history_services.abc import \
+from src.services.add_new_book_service.abc import AbstractAddNewBookService
+from src.services.search_book_service.abc import AbstractSearchBookService
+from src.services.update_history_service.abc import \
     AbstractUpdateHistoryService
 
 
