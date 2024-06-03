@@ -22,6 +22,9 @@ lxml = "^5.2.2"
 pyjwt = "^2.8.0"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 numpy = "^1.26.4"
+google-auth = "^2.29.0"
+google-auth-oauthlib = "^1.2.0"
+google-auth-httplib2 = "^0.2.0"
 
 
 [tool.poetry.dev-dependencies]

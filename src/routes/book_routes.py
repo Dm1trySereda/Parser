@@ -10,7 +10,7 @@ from src.response_schemas.users import UserResponse
 from src.services.add_new_book_facade import AddNewBookFacade
 from src.services.add_new_book_service.repository import \
     RepositoryAddNewBookService
-from src.services.authorization_facade import verify_user_is_active
+from src.services.authorization_facade import verify_user
 from src.services.delete_book_faсade import DeleteBookFacade
 from src.services.delete_book_service.repository import \
     RepositoryDeleteBookService
@@ -25,6 +25,7 @@ from src.services.update_book_service.repository import \
     RepositoryUpdateBookService
 from src.services.update_history_service.repository import \
     RepositoryUpdateHistoryService
+from src.response_schemas.users import UserResponse
 
 book_router = APIRouter(tags=["Books"])
 
@@ -37,14 +38,14 @@ book_router = APIRouter(tags=["Books"])
 )
 async def search_books(
         request: Request,
-        current_user: Annotated[UserResponse, Depends(verify_user_is_active)],
+        current_user: Annotated[UserResponse, Depends(verify_user)],
         book_id: Annotated[
             int, Query(alias="id", title="Search book for id in db", qe=1)
         ] = None,
         book_num: Annotated[int, Query(title="Search book for num", qe=100)] = None,
         title: Annotated[str, Query(title="Search book for title", min_length=3)] = None,
         author: Annotated[str, Query(title="Search book for author", min_length=3)] = None,
-) -> BookOuts | list[BookOuts]:
+):
     searcher = BookSearchFacadeServices(
         search_book_service=RepositorySearchBookService(request.state.db)
     )
@@ -60,7 +61,7 @@ async def search_books(
 )
 async def get_books_on_page(
         request: Request,
-        current_user: Annotated[UserResponse, Depends(verify_user_is_active)],
+        current_user: Annotated[UserResponse, Depends(verify_user)],
         page: Annotated[int, Query(qe=1)] = 1,
         books_quantity: Annotated[int, Query(qe=10)] = None,
         sort_by: Annotated[SortChoices, Query()] = SortChoices.title,
@@ -82,7 +83,7 @@ async def get_books_on_page(
 )
 async def add_book(
         request: Request,
-        current_user: Annotated[UserResponse, Depends(verify_user_is_active)],
+        current_user: Annotated[UserResponse, Depends(verify_user)],
         new_book: Annotated[BookIn, Body(embed=False)],
 ):
     book_inserter = AddNewBookFacade(
@@ -102,7 +103,7 @@ async def add_book(
 )
 async def change_book(
         request: Request,
-        current_user: Annotated[UserResponse, Depends(verify_user_is_active)],
+        current_user: Annotated[UserResponse, Depends(verify_user)],
         book: Annotated[BookIn, Body(embed=False)],
 ):
     book_updater = UpdateBookFacade(
@@ -122,7 +123,7 @@ async def change_book(
 )
 async def delete_book(
         request: Request,
-        current_user: Annotated[UserResponse, Depends(verify_user_is_active)],
+        current_user: Annotated[UserResponse, Depends(verify_user)],
         book_id: Annotated[int, Query(qe=1)] = None,
         book_num: Annotated[int, Query(qe=100)] = None,
 ):

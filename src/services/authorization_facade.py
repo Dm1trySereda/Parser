@@ -1,6 +1,7 @@
 from typing import Annotated
 
 import jwt
+import requests
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt import InvalidTokenError
@@ -24,30 +25,28 @@ async def verify_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    try:
+    google_response = requests.get(
+        "https://www.googleapis.com/oauth2/v1/tokeninfo",
+        params={"access_token": token.credentials},
+    )
+    if google_response.status_code == status.HTTP_200_OK:
+        return token.credentials
+    else:
+
         payload = jwt.decode(
             token.credentials,
             settings_auth.SIGNATURE,
             algorithms=[settings_auth.ALGORITHM],
         )
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-        token_data = TokenData(username=username)
-    except InvalidTokenError:
-        raise credentials_exception
-    searcher: AbstractGeUserInDbService = RepositoryGetUserService(request.state.db)
-    user = await searcher.get_current_user(username=token_data.username)
-    if user is None:
-        raise credentials_exception
-    return user
+        return payload
 
 
 async def verify_user_is_active(
         current_user: Annotated[UserResponse, Depends(verify_user)],
 ):
-    if not current_user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
-        )
-    return current_user
+    if type(current_user) == UserResponse:
+        if not current_user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
+            )
+        return current_user
