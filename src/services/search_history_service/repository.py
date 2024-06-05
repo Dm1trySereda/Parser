@@ -4,8 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.history import History
 from src.repository.history import SearchHistory
-from src.services.search_history_service.abc import \
-    AbstractSearchHistoryService
+from src.services.search_history_service.abc import AbstractSearchHistoryService
 
 
 class RepositorySearchHistoryService(AbstractSearchHistoryService):

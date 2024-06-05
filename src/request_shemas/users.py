@@ -11,12 +11,18 @@ class BaseRequestModel(BaseModel):
         populate_by_name = True
 
 
-class UserRequest(BaseRequestModel):
+class GoogleUserRequest(BaseRequestModel):
     username: Annotated[str, Field(min_length=2)]
-    hashed_password: Annotated[str, Field(min_length=2)]
     full_name: Annotated[str | None, Field(min_length=2)] = None
     email: Annotated[EmailStr | None, Field(min_length=5)] = None
+    is_google_user: Annotated[bool, Field()] = False
 
+
+class UserRequest(BaseRequestModel):
+    username: Annotated[str, Field(min_length=2)]
+    password: Annotated[str, Field(min_length=2)]
+    full_name: Annotated[str | None, Field(min_length=2)] = None
+    email: Annotated[EmailStr | None, Field(min_length=5)] = None
 
     @field_validator("username")
     @classmethod

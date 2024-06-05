@@ -10,5 +10,9 @@ class RepositoryDeleteBookService(AbstractDeleteBookService):
         self.session = session
         self.deleter = DeleteBook(session)
 
-    async def delete_book(self, current_book, book_id: int = None, book_num: int = None) -> Book:
-        return await self.deleter.delete_book(current_book=current_book, book_id=book_id, book_num=book_num)
+    async def delete_book(
+        self, current_book, book_id: int = None, book_num: int = None
+    ) -> Book:
+        return await self.deleter.delete_book(
+            current_book=current_book, book_id=book_id, book_num=book_num
+        )

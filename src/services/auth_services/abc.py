@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 
-from fastapi import Request
-
-from src.response_schemas.users import UserInDBResponse
+from src.response_schemas.users import UserResponse
 
 
 class AbstractAuthUserService(ABC):

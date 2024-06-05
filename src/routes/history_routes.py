@@ -2,14 +2,16 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, status
 from starlette.requests import Request
+
 from src.response_schemas.history import HistoryOut
-from src.response_schemas.users import UserResponse
 from src.services.authorization_facade import verify_user
-from src.services.book_price_alert_service.repository import \
-    RepositoryBookPriceAlertService
+from src.services.book_price_alert_service.repository import (
+    RepositoryBookPriceAlertService,
+)
 from src.services.search_history_faсade import HistorySearchFacadeServices
-from src.services.search_history_service.repository import \
-    RepositorySearchHistoryService
+from src.services.search_history_service.repository import (
+    RepositorySearchHistoryService,
+)
 
 history_routes = APIRouter(tags=["History"])
 
@@ -21,11 +23,11 @@ history_routes = APIRouter(tags=["History"])
     response_description="History successfully",
 )
 async def show_history(
-        request: Request,
+    request: Request,
 ):
     searcher = HistorySearchFacadeServices(
         search_history_service=RepositorySearchHistoryService(request.state.db),
-        book_price_alert=RepositoryBookPriceAlertService(request.state.db)
+        book_price_alert=RepositoryBookPriceAlertService(request.state.db),
     )
     cheap_books = await searcher.get_cheap_books()
     result = [
@@ -42,16 +44,16 @@ async def show_history(
     response_description="Search book history successfully",
 )
 async def get_history_for_book(
-        request: Request,
-        current_user: Annotated[UserResponse, Depends(verify_user)],
-        book_id: Annotated[int, Query(title="Search book for id in db", qe=1)] = None,
-        book_num: Annotated[int, Query(title="Search book for num", qe=100)] = None,
-        title: Annotated[str, Query(title="Search book for title", min_length=3)] = None,
-        author: Annotated[str, Query(title="Search book for author", min_length=3)] = None,
+    request: Request,
+    access_token: Annotated[str, Depends(verify_user)],
+    book_id: Annotated[int, Query(title="Search book for id in db", qe=1)] = None,
+    book_num: Annotated[int, Query(title="Search book for num", qe=100)] = None,
+    title: Annotated[str, Query(title="Search book for title", min_length=3)] = None,
+    author: Annotated[str, Query(title="Search book for author", min_length=3)] = None,
 ):
     searcher = HistorySearchFacadeServices(
         search_history_service=RepositorySearchHistoryService(request.state.db),
-        book_price_alert=RepositoryBookPriceAlertService(request.state.db)
+        book_price_alert=RepositoryBookPriceAlertService(request.state.db),
     )
 
     books_history = await searcher.search_history(book_id, book_num, title, author)

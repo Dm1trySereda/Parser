@@ -4,16 +4,15 @@ from src.request_shemas.books import BookIn
 from src.response_schemas.books import BookOuts
 from src.services.add_new_book_service.abc import AbstractAddNewBookService
 from src.services.search_book_service.abc import AbstractSearchBookService
-from src.services.update_history_service.abc import \
-    AbstractUpdateHistoryService
+from src.services.update_history_service.abc import AbstractUpdateHistoryService
 
 
 class AddNewBookFacade:
     def __init__(
-            self,
-            search_services: AbstractSearchBookService,
-            inserter_services: AbstractAddNewBookService,
-            history_updater_services: AbstractUpdateHistoryService,
+        self,
+        search_services: AbstractSearchBookService,
+        inserter_services: AbstractAddNewBookService,
+        history_updater_services: AbstractUpdateHistoryService,
     ):
         self.searcher = search_services
         self.inserter = inserter_services

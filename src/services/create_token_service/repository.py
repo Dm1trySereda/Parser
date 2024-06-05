@@ -8,7 +8,9 @@ from src.services.create_token_service.abc import AbstractCreateTokenService
 
 class RepositoryCreateTokenService(AbstractCreateTokenService):
 
-    async def create_access_token(self, data: dict, expires_delta: timedelta | None = None):
+    async def create_access_token(
+        self, data: dict, expires_delta: timedelta | None = None
+    ):
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.now(timezone.utc) + expires_delta

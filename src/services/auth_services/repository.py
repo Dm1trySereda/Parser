@@ -1,7 +1,8 @@
-from src.services.auth_services.abc import AbstractAuthUserService
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.services.password_service.repository import RepositoryCreatePasswordService
+
+from src.services.auth_services.abc import AbstractAuthUserService
 from src.services.get_user_in_db_service.repository import RepositoryGetUserService
+from src.services.password_service.repository import RepositoryCreatePasswordService
 
 
 class RepositoryAuthUserService(AbstractAuthUserService):
@@ -12,8 +13,9 @@ class RepositoryAuthUserService(AbstractAuthUserService):
 
     async def authenticate_user(self, username: str, password: str):
         user = await self.search_user.get_current_user(username)
-        if not user:
-            return False
-        if not self.verify.verify_password(password, user.hashed_password):
-            return False
-        return user
+        if user and await self.verify.verify_password(
+            plain_password=password, hashed_password=user.hashed_password
+        ):
+            return user
+        else:
+            return None

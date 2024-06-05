@@ -1,8 +1,11 @@
 import re
 from typing import Annotated, Optional
+
 from pydantic import BaseModel, Field, HttpUrl, field_validator
 from pydantic.alias_generators import to_camel, to_snake
+
 # from profanity
+
 
 class BaseRequestModel(BaseModel):
     class Config:

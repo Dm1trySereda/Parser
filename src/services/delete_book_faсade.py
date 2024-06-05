@@ -7,9 +7,9 @@ from src.services.search_book_service.abc import AbstractSearchBookService
 
 class DeleteBookFacade:
     def __init__(
-            self,
-            search_services: AbstractSearchBookService,
-            delete_services: AbstractDeleteBookService,
+        self,
+        search_services: AbstractSearchBookService,
+        delete_services: AbstractDeleteBookService,
     ):
         self.book_searcher = search_services
         self.book_deleter = delete_services
@@ -22,7 +22,9 @@ class DeleteBookFacade:
             )
         current_book = await self.book_searcher.search(book_id, book_num)
         if current_book:
-            delete_book = await self.book_deleter.delete_book(*current_book, book_id, book_num)
+            delete_book = await self.book_deleter.delete_book(
+                *current_book, book_id, book_num
+            )
         else:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Book not found"

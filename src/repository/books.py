@@ -43,7 +43,7 @@ class SelectBook(BaseRepository):
 class Paginate(BaseRepository):
 
     async def select_books(
-            self, page: int, books_quantity: int, sort_by: SortChoices, order_asc: bool
+        self, page: int, books_quantity: int, sort_by: SortChoices, order_asc: bool
     ) -> Result[tuple[Book]]:
         books_quantity = books_quantity or 10
         books_offset = (page - 1) * books_quantity

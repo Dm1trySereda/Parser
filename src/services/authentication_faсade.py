@@ -10,16 +10,16 @@ from src.services.create_token_service.abc import AbstractCreateTokenService
 
 class AuthenticateUserFacade:
     def __init__(
-            self,
-            auth_service: AbstractAuthUserService,
-            create_token_service: AbstractCreateTokenService,
+        self,
+        auth_service: AbstractAuthUserService,
+        create_token_service: AbstractCreateTokenService,
     ):
         self.auth_service = auth_service
         self.create_token_service = create_token_service
 
     async def authentication(self, form_data):
         user = await self.auth_service.authenticate_user(
-            form_data.username, form_data.password
+            username=form_data.username, password=form_data.password
         )
 
         if not user:
