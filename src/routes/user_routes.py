@@ -4,20 +4,19 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import HTTPBasicCredentials
 
+from src.models.users import BaseUser
 from src.request_shemas.users import UserRequest
 from src.response_schemas.users import UserResponse
 from src.services.auth_services.repository import RepositoryAuthUserService
 from src.services.authentication_faсade import AuthenticateUserFacade
-from src.services.authorization_facade import verify_user, client
+from src.services.authorization_facade import AuthorizationFacade
 from src.services.create_token_service.repository import RepositoryCreateTokenService
-from src.services.get_user_in_db_service.repository import (
-    AbstractGeUserInDbService,
-    RepositoryGetUserService,
-)
+from src.services.get_user_in_db_service.repository import RepositoryGetUserService
 from src.services.registration_user_faсade import RegistrationUserFacade
 from src.services.registration_user_service.repository import (
     RepositoryRegistrationUserService,
 )
+from src.services.validate_token.repository import RepositoryValidateTokenService
 
 user_routes = APIRouter(tags=["Users"])
 
@@ -48,13 +47,10 @@ async def registration(request: Request, new_user: Annotated[UserRequest, Depend
     return await regis_facade.registration_user(new_user)
 
 
-@user_routes.get(
-    "/users/about_me",
-    status_code=status.HTTP_200_OK,
-    response_model=UserResponse
-)
-async def about_me(
-        user: Annotated[dict, Depends(verify_user)],
-        role: Annotated[bool, Depends(client)]
-):
+auth_facade = AuthorizationFacade(
+    validate_token_service=RepositoryValidateTokenService())
+
+
+@user_routes.get("/users/about_me", status_code=status.HTTP_200_OK, response_model=UserResponse)
+async def about_me(user: BaseUser = Depends(auth_facade.get_permissions_checker(roles=[1, 2, 3]))):
     return user

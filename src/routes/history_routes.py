@@ -3,8 +3,9 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query, status
 from starlette.requests import Request
 
+from src.models.users import BaseUser
 from src.response_schemas.history import HistoryOut
-from src.services.authorization_facade import verify_user
+from src.services.authorization_facade import AuthorizationFacade
 from src.services.book_price_alert_service.repository import (
     RepositoryBookPriceAlertService,
 )
@@ -12,8 +13,11 @@ from src.services.search_history_faсade import HistorySearchFacadeServices
 from src.services.search_history_service.repository import (
     RepositorySearchHistoryService,
 )
+from src.services.validate_token.repository import RepositoryValidateTokenService
 
 history_routes = APIRouter(tags=["History"])
+auth_facade = AuthorizationFacade(
+    validate_token_service=RepositoryValidateTokenService())
 
 
 @history_routes.get(
@@ -23,7 +27,7 @@ history_routes = APIRouter(tags=["History"])
     response_description="History successfully",
 )
 async def show_history(
-    request: Request,
+        request: Request,
 ):
     searcher = HistorySearchFacadeServices(
         search_history_service=RepositorySearchHistoryService(request.state.db),
@@ -44,12 +48,12 @@ async def show_history(
     response_description="Search book history successfully",
 )
 async def get_history_for_book(
-    request: Request,
-    access_token: Annotated[str, Depends(verify_user)],
-    book_id: Annotated[int, Query(title="Search book for id in db", qe=1)] = None,
-    book_num: Annotated[int, Query(title="Search book for num", qe=100)] = None,
-    title: Annotated[str, Query(title="Search book for title", min_length=3)] = None,
-    author: Annotated[str, Query(title="Search book for author", min_length=3)] = None,
+        request: Request,
+        book_id: Annotated[int, Query(title="Search book for id in db", qe=1)] = None,
+        book_num: Annotated[int, Query(title="Search book for num", qe=100)] = None,
+        title: Annotated[str, Query(title="Search book for title", min_length=3)] = None,
+        author: Annotated[str, Query(title="Search book for author", min_length=3)] = None,
+        user: BaseUser = Depends(auth_facade.get_permissions_checker(roles=[1, 2, 3])),
 ):
     searcher = HistorySearchFacadeServices(
         search_history_service=RepositorySearchHistoryService(request.state.db),
