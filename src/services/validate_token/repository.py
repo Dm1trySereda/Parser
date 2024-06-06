@@ -1,9 +1,9 @@
 from typing import Annotated
 
+import httpx
+import jwt
 from fastapi import Depends, status
 from fastapi.security import HTTPAuthorizationCredentials
-import jwt
-import httpx
 from jwt import InvalidTokenError
 
 from src.config.auth.auth_config import settings_auth
@@ -12,7 +12,9 @@ from src.services.validate_token.abc import AbstractValidateTokenService, oauth2
 
 class RepositoryValidateTokenService(AbstractValidateTokenService):
 
-    async def validate_token(self, token: Annotated[HTTPAuthorizationCredentials, Depends(oauth2_scheme)]):
+    async def validate_token(
+        self, token: Annotated[HTTPAuthorizationCredentials, Depends(oauth2_scheme)]
+    ):
         access_token = token.credentials
         try:
             access_token_decode = jwt.decode(

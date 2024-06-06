@@ -8,7 +8,6 @@ from sqlalchemy.exc import IntegrityError
 
 from celery_worker.config.celery_configs import parser
 from src.config.database.db_helpers import db_helper
-from src.models.users import BaseRole
 from src.request_shemas.parser_book import ParserBook
 from src.services.add_new_book_service.repository import RepositoryAddNewBookService
 from src.services.parser_facade import ParserHandler
@@ -22,7 +21,7 @@ parser.conf.timezone = "Europe/Moscow"
 parser.conf.beat_schedule = {
     "run-every-10-minutes": {
         "task": "add_books_group",
-        "schedule": crontab(minute="*/2"),
+        "schedule": crontab(minute="*/10"),
     }
 }
 

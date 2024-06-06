@@ -8,13 +8,17 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from src.config.auth.auth_config import settings_auth
 from src.request_shemas.users import GoogleUserRequest
 from src.response_schemas.users import UserResponse
-# from src.services.authorization_facade import verify_user
-from src.services.validate_token.repository import RepositoryValidateTokenService
-from src.services.get_user_in_db_service.repository import RepositoryGetUserService
+from src.services.auth_services.repository import RepositoryAuthUserService
+from src.services.authentication_faсade import AuthenticateUserFacade
+from src.services.authorization_facade import AuthorizationFacade
+from src.services.get_remote_token_service.google import GetGoogleTokenService
+from src.services.get_user_service.repository import RepositoryGetUserService
 from src.services.registration_user_faсade import RegistrationUserFacade
 from src.services.registration_user_service.repository import (
     RepositoryRegistrationUserService,
 )
+from src.services.validate_token.repository import RepositoryValidateTokenService
+from src.services.create_token_service.repository import LocalCreateTokenService
 
 google_routes = APIRouter(tags=["Google Auth"])
 
@@ -26,59 +30,57 @@ async def login_google():
 
 
 @google_routes.get("/auth/google")
-async def auth_google(code: str):
-    checkout_token_url = "https://oauth2.googleapis.com/token"
-    data = {
-        "code": urllib.parse.unquote(code),
-        "client_id": settings_auth.GOOGLE_CLIENT_ID,
-        "client_secret": settings_auth.GOOGLE_CLIENT_SECRET,
-        "redirect_uri": settings_auth.GOOGLE_REDIRECT_URL,
-        "grant_type": "authorization_code",
-    }
+async def auth_google(code: str, request: Request):
+    authenticate_facade = AuthenticateUserFacade(
+        auth_service=RepositoryAuthUserService(request.state.db),
+        create_token_service=LocalCreateTokenService(),
+        get_remote_token_service=GetGoogleTokenService(
+            google_client_id=settings_auth.GOOGLE_CLIENT_ID,
+            google_client_secret=settings_auth.GOOGLE_CLIENT_SECRET,
+            google_redirect_url=settings_auth.GOOGLE_REDIRECT_URL,
+        ),
+    )
+    return await authenticate_facade.authentication_with_code(code, "google")
 
-    response = requests.post(checkout_token_url, data=data)
-    if response.status_code != status.HTTP_200_OK:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Failed to get the access token.",
+
+authorization_facade = AuthorizationFacade(
+    validate_token_service=RepositoryValidateTokenService()
+)
+
+
+@google_routes.post("/registration/google", response_model=UserResponse)
+async def reg_google(
+        access_token: Annotated[str, Depends(authorization_facade.verify_user)],
+        request: Request,
+):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            "https://people.googleapis.com/v1/people/me",
+            params={"personFields": "names,emailAddresses"},
+            headers={"Authorization": f"Bearer {access_token}"},
         )
+        if response.status_code == status.HTTP_200_OK:
+            print("Пользователь получен")
+            profile_info = response.json()
+            email_data = profile_info["emailAddresses"][0]
+            user_id = email_data["metadata"]["source"]["id"]
+            email_value = email_data["value"]
+            full_name_data = profile_info["names"][0]
+            full_name = full_name_data["displayName"]
+            user_info = {
+                "username": user_id,
+                "full_name": full_name,
+                "email": email_value,
+            }
+            regis_facade = RegistrationUserFacade(
+                search_services=RepositoryGetUserService(request.state.db),
+                registration_services=RepositoryRegistrationUserService(
+                    request.state.db
+                ),
+            )
 
-    tokens_info = response.json()
-    access_token = tokens_info.get("access_token")
-    refresh_token = tokens_info.get("refresh_token")
-
-    return {"access_token": access_token, "refresh_token": refresh_token}
-
-# @google_routes.post("/registration/google", response_model=UserResponse)
-# async def reg_google(
-#         access_token: Annotated[str, Depends(check_token)], request: Request
-# ):
-#     async with httpx.AsyncClient() as client:
-#         response = await client.get(
-#             "https://people.googleapis.com/v1/people/me",
-#             params={"personFields": "names,emailAddresses"},
-#             headers={"Authorization": f"Bearer {access_token}"},
-#         )
-#         if response.status_code == status.HTTP_200_OK:
-#             profile_info = response.json()
-#             email_data = profile_info["emailAddresses"][0]
-#             user_id = email_data["metadata"]["source"]["id"]
-#             email_value = email_data["value"]
-#             full_name_data = profile_info["names"][0]
-#             full_name = full_name_data["displayName"]
-#             user_info = {
-#                 "username": user_id,
-#                 "full_name": full_name,
-#                 "email": email_value,
-#                 "is_google_user": True,
-#             }
-#             regis_facade = RegistrationUserFacade(
-#                 search_services=RepositoryGetUserService(request.state.db),
-#                 registration_services=RepositoryRegistrationUserService(
-#                     request.state.db
-#                 ),
-#             )
-#
-#             return await regis_facade.registration_user(
-#                 new_user=GoogleUserRequest(**user_info)
-#             )
+            return await regis_facade.registration_user(
+                new_user=GoogleUserRequest(**user_info)
+            )
+        else:
+            print("hueta")

@@ -13,18 +13,19 @@ pydantic-settings = "^2.2.1"
 mysql-connector-python = "^8.4.0"
 aiomysql = "^0.2.0"
 uvicorn = "^0.29.0"
-fastapi-users = {extras = ["sqlalchemy"], version = "^13.0.0"}
 pydantic = "^2.7.1"
 celery = "^5.4.0"
 aiohttp = "^3.9.5"
 bs4 = "^0.0.2"
 lxml = "^5.2.2"
 pyjwt = "^2.8.0"
-passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 numpy = "^1.26.4"
 google-auth = "^2.29.0"
 google-auth-oauthlib = "^1.2.0"
 google-auth-httplib2 = "^0.2.0"
+passlib = "^1.7.4"
+bcrypt = "^4.1.3"
+fastapi = "^0.111.0"
 
 
 [tool.poetry.dev-dependencies]

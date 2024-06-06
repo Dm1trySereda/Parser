@@ -21,10 +21,13 @@ class UserResponse(BaseResponseModel):
     created_at: Annotated[datetime, Field(example="2024-05-20T10:00:03")]
     updated_at: Annotated[datetime, Field(example="2024-05-20T10:00:03")]
     is_active: Annotated[bool, Field()]
-    is_google_user: Annotated[bool, Field()]
     role_id: Annotated[int | None, Field()]
 
 
 class Token(BaseResponseModel):
     access_token: Annotated[str, Field()]
     token_type: Annotated[str, Field()]
+
+
+class RemoteToken(Token):
+    provider: str

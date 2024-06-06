@@ -2,14 +2,14 @@ from fastapi import HTTPException, status
 
 from src.request_shemas.users import GoogleUserRequest, UserRequest
 from src.response_schemas.users import UserResponse
-from src.services.get_user_in_db_service.abc import AbstractGeUserInDbService
+from src.services.get_user_service.abc import AbstractGeUserService
 from src.services.registration_user_service.abc import AbstractRegistrationUserService
 
 
 class RegistrationUserFacade:
     def __init__(
         self,
-        search_services: AbstractGeUserInDbService,
+        search_services: AbstractGeUserService,
         registration_services: AbstractRegistrationUserService,
     ):
         self.search_services = search_services

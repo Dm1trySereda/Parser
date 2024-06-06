@@ -1,4 +1,4 @@
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from typing import Annotated
 
 from fastapi import Depends
@@ -9,5 +9,7 @@ oauth2_scheme = HTTPBearer()
 
 class AbstractValidateTokenService(ABC):
     @abstractmethod
-    async def validate_token(self, token: Annotated[HTTPAuthorizationCredentials, Depends(oauth2_scheme)]):
+    async def validate_token(
+        self, token: Annotated[HTTPAuthorizationCredentials, Depends(oauth2_scheme)]
+    ):
         pass
