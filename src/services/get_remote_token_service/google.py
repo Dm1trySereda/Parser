@@ -1,7 +1,7 @@
 import urllib.parse
 
 import httpx
-
+from fastapi import status
 from src.response_schemas.users import RemoteToken
 from src.services.get_remote_token_service.abc import AbstractGetRemoteTokenService
 
@@ -17,8 +17,9 @@ class GetGoogleTokenService(AbstractGetRemoteTokenService):
         self._google_client_secret = google_client_secret
         self._google_client_id = google_client_id
 
-    async def get_token(self, **creds) -> RemoteToken:
+    async def get_token(self, **creds) -> RemoteToken | None:
         code = creds.get("code")
+        provider = creds.get("provider")
         checkout_token_url = "https://oauth2.googleapis.com/token"
         data = {
             "code": urllib.parse.unquote(code),
@@ -29,6 +30,7 @@ class GetGoogleTokenService(AbstractGetRemoteTokenService):
         }
         async with httpx.AsyncClient() as client:
             response = await client.post(checkout_token_url, data=data)
-
-        access_token = response.json().get("access_token")
-        return access_token
+        if response.status_code == status.HTTP_200_OK:
+            access_token = str(response.json().get("access_token"))
+            return RemoteToken(access_token=access_token, token_type="Bearer", provider=provider)
+        return None

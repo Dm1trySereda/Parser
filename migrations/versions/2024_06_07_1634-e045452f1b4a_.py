@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: ea867a467fdf
-Revises: b8c0bb245e9d
-Create Date: 2024-06-06 15:18:07.048643
+Revision ID: e045452f1b4a
+Revises: 
+Create Date: 2024-06-07 16:34:06.680609
 
 """
 
@@ -13,8 +13,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "ea867a467fdf"
-down_revision: Union[str, None] = "b8c0bb245e9d"
+revision: str = "e045452f1b4a"
+down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -24,14 +24,14 @@ def upgrade() -> None:
     op.create_table(
         "users",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column("created_at", sa.DateTime(), nullable=False),
-        sa.Column("updated_at", sa.TIMESTAMP(timezone=True), nullable=False),
         sa.Column("username", sa.String(length=255), nullable=True),
         sa.Column("hashed_password", sa.String(length=1024), nullable=True),
         sa.Column("full_name", sa.String(length=255), nullable=True),
         sa.Column("email", sa.String(length=320), nullable=False),
         sa.Column("is_active", sa.Boolean(), nullable=False),
         sa.Column("role_id", sa.Integer(), nullable=False),
+        sa.Column("created_at", sa.DateTime(), nullable=False),
+        sa.Column("updated_at", sa.TIMESTAMP(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(
             ["role_id"],
             ["roles.id"],
@@ -39,12 +39,12 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("username"),
     )
-    op.create_index(op.f("ix_users_email"), "users", ["email"], unique=False)
+    op.create_index(op.f("ix_users_email"), "users", ["email"], unique=True)
     op.create_table(
         "auth_provider_users",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column("provider_name", sa.String(length=255), nullable=False),
-        sa.Column("external_id", sa.Integer(), nullable=False),
+        sa.Column("provider", sa.String(length=255), nullable=False),
+        sa.Column("remote_user_id", sa.String(length=255), nullable=True),
         sa.Column("full_name", sa.String(length=255), nullable=True),
         sa.Column("email", sa.String(length=320), nullable=False),
         sa.Column("user_id", sa.Integer(), nullable=False),
@@ -53,13 +53,13 @@ def upgrade() -> None:
             ["users.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("external_id"),
+        sa.UniqueConstraint("remote_user_id"),
     )
     op.create_index(
         op.f("ix_auth_provider_users_email"),
         "auth_provider_users",
         ["email"],
-        unique=False,
+        unique=True,
     )
     # ### end Alembic commands ###
 

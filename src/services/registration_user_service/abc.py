@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
-from src.request_shemas.users import GoogleUserRequest, UserRequest
+from src.request_shemas.users import RemoteUserInfoRequest, UserRequest
 
 
 class AbstractRegistrationUserService(ABC):
     @abstractmethod
-    async def create_new_user(self, new_user: UserRequest | GoogleUserRequest):
+    async def create_new_user(self, new_user: UserRequest | RemoteUserInfoRequest, provider: str = None):
         pass

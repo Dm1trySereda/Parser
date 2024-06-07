@@ -14,11 +14,11 @@ from src.services.search_history_faсade import HistorySearchFacadeServices
 from src.services.search_history_service.repository import (
     RepositorySearchHistoryService,
 )
-from src.services.validate_token.repository import RepositoryValidateTokenService
+from src.services.validate_token_service.repository import RepositoryValidateTokenService
 
 history_routes = APIRouter(tags=["History"])
 auth_facade = AuthorizationFacade(
-    validate_token_service=RepositoryValidateTokenService()
+    validate_token_service_service=RepositoryValidateTokenService()
 )
 
 

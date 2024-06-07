@@ -11,10 +11,11 @@ class BaseRequestModel(BaseModel):
         populate_by_name = True
 
 
-class GoogleUserRequest(BaseRequestModel):
-    username: Annotated[str, Field(min_length=2)]
+class RemoteUserInfoRequest(BaseRequestModel):
+    remote_user_id: Annotated[int, Field(qe=1)]
     full_name: Annotated[str | None, Field(min_length=2)] = None
     email: Annotated[EmailStr | None, Field(min_length=5)] = None
+    # phone_number: Annotated[str, Field(min_length=7)] = None
 
 
 class UserRequest(BaseRequestModel):

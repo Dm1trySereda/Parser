@@ -19,7 +19,7 @@ from src.services.registration_user_faсade import RegistrationUserFacade
 from src.services.registration_user_service.repository import (
     RepositoryRegistrationUserService,
 )
-from src.services.validate_token.repository import RepositoryValidateTokenService
+from src.services.validate_token_service.repository import RepositoryValidateTokenService
 
 user_routes = APIRouter(tags=["Users"])
 
@@ -55,7 +55,7 @@ async def registration(request: Request, new_user: Annotated[UserRequest, Depend
 
 
 auth_facade = AuthorizationFacade(
-    validate_token_service=RepositoryValidateTokenService()
+    validate_token_service_service=RepositoryValidateTokenService()
 )
 
 

@@ -7,12 +7,12 @@ from fastapi.security import HTTPAuthorizationCredentials
 from jwt import InvalidTokenError
 
 from src.config.auth.auth_config import settings_auth
-from src.services.validate_token.abc import AbstractValidateTokenService, oauth2_scheme
+from src.services.validate_token_service.abc import AbstractValidateTokenService, oauth2_scheme
 
 
 class RepositoryValidateTokenService(AbstractValidateTokenService):
 
-    async def validate_token(
+    async def validate_token_service(
         self, token: Annotated[HTTPAuthorizationCredentials, Depends(oauth2_scheme)]
     ):
         access_token = token.credentials
