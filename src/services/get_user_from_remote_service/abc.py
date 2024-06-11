@@ -5,4 +5,5 @@ from src.response_schemas.users import RemoteToken
 
 
 class AbstractGetUserInfoFromRemoteService(ABC):
-    async def get_user_info(self, remote_token: RemoteToken) -> RemoteUserInfoRequest: pass
+    async def get_user_info(self, remote_token: RemoteToken) -> RemoteUserInfoRequest:
+        pass

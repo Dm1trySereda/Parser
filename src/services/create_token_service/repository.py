@@ -1,10 +1,8 @@
-import urllib.parse
 from datetime import datetime, timedelta, timezone
 
-import httpx
 import jwt
 
-from src.config.auth.auth_config import settings_auth
+from src.config.auth_provider.auth_provider_config import settings_auth
 from src.response_schemas.users import Token
 from src.services.create_token_service.abc import AbstractCreateTokenService
 
@@ -12,7 +10,7 @@ from src.services.create_token_service.abc import AbstractCreateTokenService
 class LocalCreateTokenService(AbstractCreateTokenService):
 
     async def create_access_token(
-            self, data: dict, expires_delta: timedelta | None = None
+        self, data: dict, expires_delta: timedelta | None = None
     ) -> Token:
         to_encode = data.copy()
         if expires_delta:

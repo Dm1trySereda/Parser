@@ -1,7 +1,5 @@
-from typing import Dict
-
 from passlib.context import CryptContext
-from sqlalchemy import and_, exists, insert, select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.users import AuthProvider, Role, User
@@ -32,7 +30,8 @@ class SearchUser(BaseRepository):
 
 
 class CreateNewUser(BaseRepository):
-    async def create_new(self, new_user: dict, provider: str):
+
+    async def create_new(self, new_user: dict, confirmation_code: int):
         password = new_user.get("password")
         hashed_password = pwd_context.hash(password) if password else None
         user = User(
@@ -40,19 +39,41 @@ class CreateNewUser(BaseRepository):
             hashed_password=hashed_password,
             full_name=new_user.get("full_name"),
             email=new_user.get("email"),
+            confirmation_code=confirmation_code,
         )
         self.async_session.add(user)
         await self.async_session.commit()
-        if provider:
-            auth_provider = AuthProvider(
-                provider=provider,
-                remote_user_id=new_user.get("remote_user_id"),
-                full_name=new_user.get("full_name"),
-                email=new_user.get("email"),
-                user_id=user.id,
-            )
-            self.async_session.add(auth_provider)
         return user
+
+
+class AddAuthProvider(BaseRepository):
+    async def create_new_auth_provider(self, user: dict, provider: str):
+        stmt = select(User.id).where(User.email == user.get("email"))
+        result = await self.async_session.execute(stmt)
+        user_id = result.scalar_one()
+
+        auth_provider = AuthProvider(
+            provider=provider,
+            remote_user_id=user.get("remote_user_id"),
+            full_name=user.get("full_name"),
+            email=user.get("email"),
+            user_id=user_id,
+        )
+
+        self.async_session.add(auth_provider)
+
+
+class UpdateUserInformation(BaseRepository):
+    async def update_info(self, email: str, code: int):
+        if code:
+            stmt = (
+                update(User)
+                .where(User.email == email)
+                .values(is_active=True, confirmation_code=code)
+            )
+        else:
+            stmt = update(User).where(User.email == email).values(is_active=True)
+        await self.async_session.execute(stmt)
 
 
 class GetRoleAssociation(BaseRepository):

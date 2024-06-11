@@ -1,8 +1,7 @@
-import re
 from datetime import datetime
 from typing import Annotated
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field
 from pydantic.alias_generators import to_camel
 
 

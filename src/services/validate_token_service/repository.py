@@ -6,8 +6,11 @@ from fastapi import Depends, status
 from fastapi.security import HTTPAuthorizationCredentials
 from jwt import InvalidTokenError
 
-from src.config.auth.auth_config import settings_auth
-from src.services.validate_token_service.abc import AbstractValidateTokenService, oauth2_scheme
+from src.config.auth_provider.auth_provider_config import settings_auth
+from src.services.validate_token_service.abc import (
+    AbstractValidateTokenService,
+    oauth2_scheme,
+)
 
 
 class RepositoryValidateTokenService(AbstractValidateTokenService):

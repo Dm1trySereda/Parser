@@ -12,9 +12,9 @@ class RepositoryAuthUserService(AbstractAuthUserService):
         self.search_user = RepositoryGetUserService(session)
 
     async def authenticate_user(self, username: str, password: str):
-        user = await self.search_user.get_current_user(username)
+        user = await self.search_user.get_current_user(username=username)
         if user and await self.verify.verify_password(
-                plain_password=password, hashed_password=user.hashed_password
+            plain_password=password, hashed_password=user.hashed_password
         ):
             return user
         else:

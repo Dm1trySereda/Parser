@@ -2,16 +2,17 @@ import urllib.parse
 
 import httpx
 from fastapi import status
+
 from src.response_schemas.users import RemoteToken
 from src.services.get_remote_token_service.abc import AbstractGetRemoteTokenService
 
 
 class GetGoogleTokenService(AbstractGetRemoteTokenService):
     def __init__(
-            self,
-            google_client_id: str,
-            google_client_secret: str,
-            google_redirect_url: str,
+        self,
+        google_client_id: str,
+        google_client_secret: str,
+        google_redirect_url: str,
     ):
         self._google_redirect_url = google_redirect_url
         self._google_client_secret = google_client_secret
@@ -32,5 +33,7 @@ class GetGoogleTokenService(AbstractGetRemoteTokenService):
             response = await client.post(checkout_token_url, data=data)
         if response.status_code == status.HTTP_200_OK:
             access_token = str(response.json().get("access_token"))
-            return RemoteToken(access_token=access_token, token_type="Bearer", provider=provider)
+            return RemoteToken(
+                access_token=access_token, token_type="Bearer", provider=provider
+            )
         return None

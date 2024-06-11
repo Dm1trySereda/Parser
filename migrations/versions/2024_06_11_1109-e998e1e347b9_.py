@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: e045452f1b4a
-Revises: 
-Create Date: 2024-06-07 16:34:06.680609
+Revision ID: e998e1e347b9
+Revises: 7d92209f8341
+Create Date: 2024-06-11 11:09:38.422611
 
 """
 
@@ -13,8 +13,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "e045452f1b4a"
-down_revision: Union[str, None] = None
+revision: str = "e998e1e347b9"
+down_revision: Union[str, None] = "7d92209f8341"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -30,6 +30,7 @@ def upgrade() -> None:
         sa.Column("email", sa.String(length=320), nullable=False),
         sa.Column("is_active", sa.Boolean(), nullable=False),
         sa.Column("role_id", sa.Integer(), nullable=False),
+        sa.Column("confirmation_code", sa.Integer(), nullable=False),
         sa.Column("created_at", sa.DateTime(), nullable=False),
         sa.Column("updated_at", sa.TIMESTAMP(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(

@@ -22,7 +22,9 @@ from src.services.update_book_service.repository import RepositoryUpdateBookServ
 from src.services.update_history_service.repository import (
     RepositoryUpdateHistoryService,
 )
-from src.services.validate_token_service.repository import RepositoryValidateTokenService
+from src.services.validate_token_service.repository import (
+    RepositoryValidateTokenService,
+)
 
 book_router = APIRouter(tags=["Books"])
 auth_facade = AuthorizationFacade(

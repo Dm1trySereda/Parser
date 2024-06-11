@@ -11,10 +11,10 @@ class RepositoryGetUserService(AbstractGetUserService):
         self.searcher = SearchUser(session)
 
     async def get_current_user(
-            self,
-            email: str = None,
-            remote_user_id: int = None,
-            username: str = None,
+        self,
+        email: str = None,
+        remote_user_id: int = None,
+        username: str = None,
     ) -> User | None:
         search_user = await self.searcher.get_user(
             email=email, remote_user_id=remote_user_id, username=username

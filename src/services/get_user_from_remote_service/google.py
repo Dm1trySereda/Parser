@@ -18,11 +18,16 @@ class GetGoogleUserInfoService(AbstractGetUserInfoFromRemoteService):
                 headers={"Authorization": f"Bearer {access_token}"},
             )
             if response.status_code != 200:
-                raise Exception('Error: Received an unexpected status from Google: %s' % response.status_code)
+                raise Exception(
+                    "Error: Received an unexpected status from Google: %s"
+                    % response.status_code
+                )
             profile_info = response.json()
             email_data = profile_info["emailAddresses"][0]
             remote_user_id = email_data["metadata"]["source"]["id"]
             email_value = email_data["value"]
             full_name_data = profile_info["names"][0]
             full_name = full_name_data["displayName"]
-            return RemoteUserInfoRequest(remote_user_id=remote_user_id, full_name=full_name, email=email_value)
+            return RemoteUserInfoRequest(
+                remote_user_id=remote_user_id, full_name=full_name, email=email_value
+            )
