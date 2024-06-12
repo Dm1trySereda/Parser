@@ -33,7 +33,7 @@ auth_facade = AuthorizationFacade(
 
 
 @book_router.get(
-    "/search",
+    "/books/search",
     status_code=status.HTTP_200_OK,
     response_description="Search successful",
     response_model=list[BookOuts],
@@ -86,7 +86,7 @@ async def get_books_on_page(
 
 
 @book_router.post(
-    "/books/add",
+    "/books/create",
     status_code=status.HTTP_201_CREATED,
     response_model=BookOuts,
     response_description="Book added",
@@ -110,7 +110,7 @@ async def add_book(
 
 
 @book_router.put(
-    "/books/update",
+    "/books/edit",
     status_code=status.HTTP_200_OK,
     response_model=BookOuts,
     response_description="Book updated",
@@ -134,7 +134,7 @@ async def change_book(
 
 
 @book_router.delete(
-    "/books/delete",
+    "/books/remove",
     status_code=status.HTTP_202_ACCEPTED,
     response_description="Book deleted",
     response_model=BookOuts,

@@ -9,6 +9,7 @@ from src.services.auth_provider_registration_user_service.abc import (
 )
 from src.services.auth_services.abc import AbstractAuthUserService
 from src.services.create_token_service.abc import AbstractCreateTokenService
+from src.services.generate_otp_code_service.abc import AbstractGenerateOtpCodeService
 from src.services.get_remote_token_service.abc import AbstractGetRemoteTokenService
 from src.services.get_user_from_remote_service.abc import (
     AbstractGetUserInfoFromRemoteService,
@@ -30,7 +31,9 @@ class AuthenticateUserFacade:
         registration_user_service: AbstractRegistrationUserService,
         update_user_info_service: AbstractUpdateUserInfoService,
         auth_provider_registration_user_service: AbstractAuthProviderRegistrationUserService,
+        generate_otp_code_service: AbstractGenerateOtpCodeService,
         send_mail_service: AbstractSendMailService,
+        email_login: str,
     ):
         self.auth_service = auth_service
         self.create_token_service = create_token_service
@@ -42,7 +45,9 @@ class AuthenticateUserFacade:
         self.auth_provider_registration_user_service = (
             auth_provider_registration_user_service
         )
+        self.generate_otp_code_service = generate_otp_code_service
         self.send_mail_service = send_mail_service
+        self._email_login = email_login
 
     async def authentication(self, form_data) -> Token:
         user = await self.auth_service.authenticate_user(
@@ -82,16 +87,27 @@ class AuthenticateUserFacade:
             remote_user_id=user_info.remote_user_id
         )
 
-        confirmation_code = await self.send_mail_service.send_mail(
-            recipient_email=user_info.email
-        )
-
-        if current_user_by_email and not current_user_by_remote_user_id:
+        if (
+            current_user_by_email
+            and current_user_by_email.is_active
+            and not current_user_by_remote_user_id
+        ):
             await self.auth_provider_registration_user_service.create_new_auth_provider(
                 user=user_info, provider=provider
             )
 
         if not current_user_by_email:
+            confirmation_code = await self.generate_otp_code_service.generate_code()
+            with open("src/templates/registration_mail.html", "r") as file:
+                registration_mail = file.read()
+                email_content = registration_mail.format(
+                    confirmation_code=confirmation_code, recipient_email=user_info.email
+                )
+                await self.send_mail_service.send_mail(
+                    sender_email=self._email_login,
+                    recipient_email=user_info.email,
+                    email=email_content,
+                )
             await self.registration_user_service.create_new_user(
                 new_user=user_info, confirmation_code=confirmation_code
             )

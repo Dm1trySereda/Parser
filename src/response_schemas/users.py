@@ -23,6 +23,12 @@ class UserResponse(BaseResponseModel):
     role_id: Annotated[int | None, Field()]
 
 
+class UserVerifyEmail(BaseResponseModel):
+    username: Annotated[str | None, Field(min_length=2)]
+    email: Annotated[EmailStr | None, Field(min_length=5)]
+    is_active: Annotated[bool, Field()]
+
+
 class Token(BaseResponseModel):
     access_token: Annotated[str, Field()]
     token_type: Annotated[str, Field()]

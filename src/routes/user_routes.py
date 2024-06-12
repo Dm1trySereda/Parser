@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Request, status, Query
+from fastapi import APIRouter, Depends, Query, Request, status
 from fastapi.security import HTTPBasicCredentials
 
 from src.config.auth_provider.auth_provider_config import settings_auth
@@ -8,7 +8,7 @@ from src.config.send_mail.send_mail_congif import settings_send_mail
 from src.enums.role import UserRoleEnum
 from src.models.users import User
 from src.request_shemas.users import UserRequest
-from src.response_schemas.users import UserResponse
+from src.response_schemas.users import UserResponse, UserVerifyEmail
 from src.services.auth_provider_registration_user_service.repository import (
     RepositoryAuthProviderRegistrationUserService,
 )
@@ -17,6 +17,7 @@ from src.services.authentication_faсade import AuthenticateUserFacade
 from src.services.authorization_facade import AuthorizationFacade
 from src.services.create_token_service.repository import LocalCreateTokenService
 from src.services.email_verification_facade import EmailVerificationFacade
+from src.services.generate_otp_code_service.generate import GenerateOtpCodeService
 from src.services.get_remote_token_service.google import GetGoogleTokenService
 from src.services.get_user_from_remote_service.google import GetGoogleUserInfoService
 from src.services.get_user_service.repository import RepositoryGetUserService
@@ -38,7 +39,7 @@ auth_facade = AuthorizationFacade(
 )
 
 
-@user_routes.post("/authentication")
+@user_routes.post("/users/signin")
 async def login(
     request: Request, form_data: Annotated[HTTPBasicCredentials, Depends()]
 ):
@@ -63,13 +64,15 @@ async def login(
             smtp_port=settings_send_mail.SMTP_PORT,
             timeout=settings_send_mail.TIMEOUT,
         ),
+        email_login=settings_send_mail.EMAIL_ADDRESS,
+        generate_otp_code_service=GenerateOtpCodeService(),
         update_user_info_service=RepositoryUpdateUserInfoService(request.state.db),
     )
     return await authenticate_facade.authentication(form_data)
 
 
 @user_routes.post(
-    "/registration",
+    "/users/signup",
     status_code=status.HTTP_201_CREATED,
     response_model=UserResponse,
     response_description="User created",
@@ -85,14 +88,17 @@ async def registration(request: Request, new_user: Annotated[UserRequest, Depend
             smtp_port=settings_send_mail.SMTP_PORT,
             timeout=settings_send_mail.TIMEOUT,
         ),
+        email_login=settings_send_mail.EMAIL_ADDRESS,
+        generate_otp_code_service=GenerateOtpCodeService(),
     )
 
     return await regis_facade.registration_user(new_user)
 
 
 @user_routes.post(
-    "/confirmation",
+    "/users/verify-email",
     status_code=status.HTTP_200_OK,
+    response_model=UserVerifyEmail,
     response_description="email confirmed",
 )
 async def confirmation(
@@ -101,14 +107,15 @@ async def confirmation(
     user: User = Depends(auth_facade.verify_user),
 ):
     confirmation_facade = EmailVerificationFacade(
-        update_user_info_service=RepositoryUpdateUserInfoService(request.state.db)
+        update_user_info_service=RepositoryUpdateUserInfoService(request.state.db),
+        get_user_service=RepositoryGetUserService(request.state.db),
     )
-    await confirmation_facade.verify_email(confirmation_code, user)
-    return {"success": f"Email {user.email} confirmed"}
+    await confirmation_facade.verify_email(code=confirmation_code, email=user.email)
+    return user
 
 
 @user_routes.get(
-    "/users/about_me", status_code=status.HTTP_200_OK, response_model=UserResponse
+    "/users/my-profile", status_code=status.HTTP_200_OK, response_model=UserResponse
 )
 async def about_me(
     user: User = Depends(

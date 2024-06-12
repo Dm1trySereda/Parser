@@ -1,9 +1,24 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import TIMESTAMP, Boolean, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base
+
+
+class ConfirmationEmailCode(Base):
+    __tablename__ = "confirmation_email_codes"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    code: Mapped[str] = mapped_column(String(length=1024), nullable=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+
+    user_relationship = relationship(
+        "User",
+        back_populates="confirmation_email_code",
+    )
 
 
 class AuthProvider(Base):
@@ -18,12 +33,12 @@ class AuthProvider(Base):
     email: Mapped[str] = mapped_column(
         String(length=320), unique=True, index=True, nullable=False
     )
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     user_relationship = relationship(
         "User",
         back_populates="external_user_relationship",
-        cascade="all, delete-orphan",
-        single_parent=True,
     )
 
 
@@ -52,13 +67,23 @@ class User(Base):
     )
     is_active: Mapped[bool] = mapped_column(Boolean, default=False)
     role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"), default=3)
-    confirmation_code: Mapped[int] = mapped_column(nullable=False)
-    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(default=datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow
+        TIMESTAMP(timezone=True),
+        default=datetime.now(timezone.utc),
+        onupdate=datetime.utcnow,
     )
 
     role_relationship = relationship("Role", back_populates="users_relationship")
     external_user_relationship = relationship(
-        "AuthProvider", back_populates="user_relationship", uselist=False
+        "AuthProvider",
+        back_populates="user_relationship",
+        cascade="all, delete-orphan",
+        uselist=False,
+    )
+    confirmation_email_code = relationship(
+        "ConfirmationEmailCode",
+        back_populates="user_relationship",
+        cascade="all, delete-orphan",
+        uselist=False,
     )

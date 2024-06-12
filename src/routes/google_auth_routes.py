@@ -9,6 +9,7 @@ from src.services.auth_services.repository import RepositoryAuthUserService
 from src.services.authentication_faсade import AuthenticateUserFacade
 from src.services.authorization_facade import AuthorizationFacade
 from src.services.create_token_service.repository import LocalCreateTokenService
+from src.services.generate_otp_code_service.generate import GenerateOtpCodeService
 from src.services.get_remote_token_service.google import GetGoogleTokenService
 from src.services.get_user_from_remote_service.google import GetGoogleUserInfoService
 from src.services.get_user_service.repository import RepositoryGetUserService
@@ -16,14 +17,17 @@ from src.services.registration_user_service.repository import (
     RepositoryRegistrationUserService,
 )
 from src.services.send_mail_service.email import SendMailService
+from src.services.update_user_info_service.repository import (
+    RepositoryUpdateUserInfoService,
+)
 from src.services.validate_token_service.repository import (
     RepositoryValidateTokenService,
 )
-from src.services.update_user_info_service.repository import RepositoryUpdateUserInfoService
+
 google_routes = APIRouter(tags=["Google Auth"])
 
 
-@google_routes.get("/login/google")
+@google_routes.get("/start-google-login")
 async def login_google():
     url_redirect = (
         f"https://accounts.google.com/o/oauth2/auth?response_type=code&client_id={settings_auth.GOOGLE_CLIENT_ID}"
@@ -32,7 +36,7 @@ async def login_google():
     return {"url": url_redirect}
 
 
-@google_routes.get("/auth_provider/google")
+@google_routes.get("/process-google-login")
 async def auth_google(code: str, request: Request):
     authenticate_facade = AuthenticateUserFacade(
         auth_service=RepositoryAuthUserService(request.state.db),
@@ -55,7 +59,9 @@ async def auth_google(code: str, request: Request):
             smtp_port=settings_send_mail.SMTP_PORT,
             timeout=settings_send_mail.TIMEOUT,
         ),
-        update_user_info_service=RepositoryUpdateUserInfoService(request.state.db)
+        email_login=settings_send_mail.EMAIL_ADDRESS,
+        generate_otp_code_service=GenerateOtpCodeService(),
+        update_user_info_service=RepositoryUpdateUserInfoService(request.state.db),
     )
     return await authenticate_facade.authentication_with_code(code, "Google")
 

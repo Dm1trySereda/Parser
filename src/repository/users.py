@@ -1,8 +1,11 @@
-from passlib.context import CryptContext
-from sqlalchemy import select, update
-from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import datetime, timedelta
 
-from src.models.users import AuthProvider, Role, User
+from passlib.context import CryptContext
+from sqlalchemy import delete, select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
+
+from src.models.users import AuthProvider, ConfirmationEmailCode, Role, User
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -26,6 +29,7 @@ class SearchUser(BaseRepository):
                 User.id == AuthProvider.user_id,
                 AuthProvider.remote_user_id == remote_user_id,
             )
+        query = query.options(joinedload(User.confirmation_email_code))
         return await self.async_session.execute(query)
 
 
@@ -39,9 +43,13 @@ class CreateNewUser(BaseRepository):
             hashed_password=hashed_password,
             full_name=new_user.get("full_name"),
             email=new_user.get("email"),
-            confirmation_code=confirmation_code,
         )
         self.async_session.add(user)
+        await self.async_session.flush()
+        confirmation_email_code = ConfirmationEmailCode(
+            code=confirmation_code, user_relationship=user
+        )
+        self.async_session.add(confirmation_email_code)
         await self.async_session.commit()
         return user
 
@@ -64,16 +72,19 @@ class AddAuthProvider(BaseRepository):
 
 
 class UpdateUserInformation(BaseRepository):
-    async def update_info(self, email: str, code: int):
-        if code:
-            stmt = (
-                update(User)
-                .where(User.email == email)
-                .values(is_active=True, confirmation_code=code)
-            )
-        else:
-            stmt = update(User).where(User.email == email).values(is_active=True)
+    async def update_info(self, email: str):
+        stmt = update(User).where(User.email == email).values(is_active=True)
         await self.async_session.execute(stmt)
+
+
+class DeleteInactiveUser(BaseRepository):
+    async def delete_inactive_user(self, current_time: datetime):
+        query = delete(User)
+        query = query.filter(
+            User.is_active.is_(False),
+            User.created_at < current_time - timedelta(hours=1),
+        )
+        await self.async_session.execute(query)
 
 
 class GetRoleAssociation(BaseRepository):

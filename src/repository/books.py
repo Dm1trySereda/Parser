@@ -1,11 +1,8 @@
-from typing import Tuple
-
-from sqlalchemy import Result, and_, asc, delete, desc, select, update
+from sqlalchemy import Result, asc, delete, desc, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.enums.book import SortChoices
 from src.models.books import Book
-from src.models.history import History
 
 
 class BaseRepository:
@@ -15,29 +12,27 @@ class BaseRepository:
 
 class SelectBook(BaseRepository):
     async def select_book(self, **kwargs) -> Result[tuple[Book]]:
-        select_values = list()
+        query = select(Book)
 
         if kwargs.get("book_id"):
-            select_values.append(Book.id == kwargs.get("book_id"))
+            query = query.filter(Book.id == kwargs.get("book_id"))
         if kwargs.get("book_num"):
-            select_values.append(Book.book_num == kwargs.get("book_num"))
+            query = query.filter(Book.book_num == kwargs.get("book_num"))
         if kwargs.get("title"):
-            select_values.append(Book.title.contains(kwargs.get("title")))
+            query = query.filter(Book.title.contains(kwargs.get("title")))
         if kwargs.get("author"):
-            select_values.append(Book.author.contains(kwargs.get("author")))
+            query = query.filter(Book.author.contains(kwargs.get("author")))
         if kwargs.get("price_new"):
-            select_values.append(Book.price_new == kwargs.get("price_new"))
+            query = query.filter(Book.price_new == kwargs.get("price_new"))
         if kwargs.get("price_old"):
-            select_values.append(Book.price_old == kwargs.get("price_old"))
+            query = query.filter(Book.price_old == kwargs.get("price_old"))
         if kwargs.get("discount"):
-            select_values.append(Book.discount == kwargs.get("discount"))
+            query = query.filter(Book.discount == kwargs.get("discount"))
         if kwargs.get("rating"):
-            select_values.append(Book.rating == kwargs.get("rating"))
+            query = query.filter(Book.rating == kwargs.get("rating"))
         if kwargs.get("image"):
-            select_values.append(Book.image == kwargs.get("image"))
-
-        stmt = select(Book).where(and_(*select_values))
-        return await self.async_session.execute(stmt)
+            query = query.filter(Book.image == kwargs.get("image"))
+        return await self.async_session.execute(query)
 
 
 class Paginate(BaseRepository):
@@ -45,16 +40,15 @@ class Paginate(BaseRepository):
     async def select_books(
         self, page: int, books_quantity: int, sort_by: SortChoices, order_asc: bool
     ) -> Result[tuple[Book]]:
+        query = select(Book)
         books_quantity = books_quantity or 10
         books_offset = (page - 1) * books_quantity
         sort_params = (
             getattr(Book, sort_by.value) if hasattr(Book, sort_by.value) else Book.title
         )
         sort_order = asc(sort_params) if order_asc else desc(sort_params)
-        stmt = (
-            select(Book).limit(books_quantity).offset(books_offset).order_by(sort_order)
-        )
-        return await self.async_session.execute(stmt)
+        query = query.limit(books_quantity).offset(books_offset).order_by(sort_order)
+        return await self.async_session.execute(query)
 
 
 class InsertBook(BaseRepository):
@@ -104,12 +98,10 @@ class UpdateBook(BaseRepository):
 class DeleteBook(BaseRepository):
 
     async def delete_book(self, current_book, **kwargs):
-        select_values = list()
+        query = delete(Book)
         if kwargs.get("book_id"):
-            select_values.append(Book.id == kwargs.get("book_id"))
+            query = query.filter(Book.id == kwargs.get("book_id"))
         if kwargs.get("book_num"):
-            select_values.append(Book.book_num == kwargs.get("book_num"))
-
-        stmt = delete(Book).where(*select_values)
-        await self.async_session.execute(stmt)
+            query = query.filter(Book.book_num == kwargs.get("book_num"))
+        await self.async_session.execute(query)
         return current_book

@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timezone
 from parser.async_parser import reading_session
 
 from celery import chain, group
@@ -10,6 +11,9 @@ from celery_worker.config.celery_configs import parser
 from src.config.database.db_helpers import db_helper
 from src.request_shemas.parser_book import ParserBook
 from src.services.add_new_book_service.repository import RepositoryAddNewBookService
+from src.services.delete_inactive_user_service.repository import (
+    RepositoryDeleteInactiveUserService,
+)
 from src.services.parser_facade import ParserHandler
 from src.services.search_book_service.repository import RepositorySearchBookService
 from src.services.update_book_service.repository import RepositoryUpdateBookService
@@ -25,8 +29,6 @@ parser.conf.beat_schedule = {
     }
 }
 
-current_range_start = 1
-
 
 @parser.task(name="reading_pages")
 def reading_pages(page: int) -> list:
@@ -39,12 +41,12 @@ def create_or_update_books(pages: list) -> None:
     loop = asyncio.get_event_loop()
 
     async def wrapped():
-        async with db_helper.get_db_session() as session:
+        async with db_helper.get_db_session() as async_session:
             books_handler = ParserHandler(
-                search_services=RepositorySearchBookService(session),
-                update_services=RepositoryUpdateBookService(session),
-                insert_services=RepositoryAddNewBookService(session),
-                update_history_services=RepositoryUpdateHistoryService(session),
+                search_services=RepositorySearchBookService(async_session),
+                update_services=RepositoryUpdateBookService(async_session),
+                insert_services=RepositoryAddNewBookService(async_session),
+                update_history_services=RepositoryUpdateHistoryService(async_session),
             )
             for books in pages:
                 if not pages:
@@ -56,9 +58,9 @@ def create_or_update_books(pages: list) -> None:
                         continue
                     try:
                         await books_handler.process_books(valid_book)
-                        await session.commit()
+                        await async_session.commit()
                     except IntegrityError:
-                        await session.rollback()
+                        await async_session.rollback()
 
     return loop.run_until_complete(wrapped())
 
@@ -68,17 +70,33 @@ def add_books_history() -> None:
     loop = asyncio.get_event_loop()
 
     async def wrapper():
-        async with db_helper.get_db_session() as session:
+        async with db_helper.get_db_session() as async_session:
             book_handler = ParserHandler(
-                search_services=RepositorySearchBookService(session),
-                update_services=RepositoryUpdateBookService(session),
-                insert_services=RepositoryAddNewBookService(session),
-                update_history_services=RepositoryUpdateHistoryService(session),
+                search_services=RepositorySearchBookService(async_session),
+                update_services=RepositoryUpdateBookService(async_session),
+                insert_services=RepositoryAddNewBookService(async_session),
+                update_history_services=RepositoryUpdateHistoryService(async_session),
             )
 
             await book_handler.process_books_history()
 
     return loop.run_until_complete(wrapper())
+
+
+@parser.task(name="delete_inactive_user")
+def delete_inactive_user() -> None:
+    loop = asyncio.get_event_loop()
+
+    async def wrapper():
+        async with db_helper.get_db_session() as async_session:
+            current_time = datetime.now(timezone.utc)
+            user_handler = RepositoryDeleteInactiveUserService(async_session)
+            await user_handler.delete_inactive_user(current_time)
+
+    return loop.run_until_complete(wrapper())
+
+
+current_range_start = 1
 
 
 @parser.task(name="add_books_group")
@@ -92,6 +110,7 @@ def add_books_group():
         read_tasks, create_or_update_books.s(), add_books_history.si()
     )
     write_tasks_chain.delay()
+    delete_inactive_user.delay()
     current_range_start += 100
     if current_range_start > 800:
         current_range_start = 1

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.request_shemas.users import UserRequest, RemoteUserInfoRequest
+from src.request_shemas.users import RemoteUserInfoRequest, UserRequest
 
 
 class AbstractRegistrationUserService(ABC):
