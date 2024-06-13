@@ -1,6 +1,9 @@
+import base64
 import logging
 import smtplib
 from email.header import Header
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from pydantic import EmailStr
@@ -24,9 +27,20 @@ class SendMailService(AbstractSendMailService):
         self._timeout = timeout
 
     async def send_mail(
-        self, sender_email: EmailStr, recipient_email: EmailStr, email: str
+        self,
+        sender_email: EmailStr,
+        recipient_email: EmailStr,
+        email_body: str,
+        qrcode: str,
     ):
-        msg = MIMEText(email, "html", "utf-8")
+        msg = MIMEMultipart("related")
+        msg_html = MIMEText(email_body, "html", "utf-8")
+        msg.attach(msg_html)
+        img_data = base64.b64decode(qrcode)
+        msg_image = MIMEImage(img_data)
+        msg_image.add_header("Content-ID", "<image1>")
+        msg.attach(msg_image)
+
         email_subject = "Подтверждение регистрации на сайте OZBooks"
         msg["From"] = sender_email
         msg["To"] = recipient_email

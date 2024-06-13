@@ -10,16 +10,18 @@
             color: #333;
         }}
         .email-content {{
+            text-align: start;
             max-width: 600px;
             margin: 0 auto;
+            margin-top: 30px;
             padding: 20px;
             background-color: #ffffff;
-            border-radius: 5px;
-            box-shadow: 1px 1px 10px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.1);
         }}
         .brand {{
             color: #25a2b8;
-            font-size: 20px;
+            font-size: 16px;
             font-weight: bold;
         }}
         .code {{
@@ -40,8 +42,9 @@
     <p class="text">Здравствуйте,</p>
     <p class="text">Вы указали свою электронную почту {recipient_email} для регистрации на сайте <span
             class="brand">OZBooks</span>.<br>
-        Для завершения процесса регистрации, пожалуйста, подтвердите свою почту, введя следующий код:</p>
-    <p class="code">Ваш код подтверждения: {confirmation_code}</p>
+        Для завершения процесса регистрации, пожалуйста, подтвердите свою почту,<br> сканируйте QR-код с
+        помощью
+        вашего приложения для аутентификации</p>
     <p class="text">Если вы не регистрировались на сайте OZBooks, пожалуйста, проигнорируйте это письмо.</p>
     <p class="text">С уважением,<br>
         Команда OZBooks</p>

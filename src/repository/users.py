@@ -5,7 +5,7 @@ from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from src.models.users import AuthProvider, ConfirmationEmailCode, Role, User
+from src.models.users import AuthProvider, Role, User
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -35,7 +35,7 @@ class SearchUser(BaseRepository):
 
 class CreateNewUser(BaseRepository):
 
-    async def create_new(self, new_user: dict, confirmation_code: int):
+    async def create_new(self, new_user: dict, is_active: bool = False):
         password = new_user.get("password")
         hashed_password = pwd_context.hash(password) if password else None
         user = User(
@@ -43,14 +43,9 @@ class CreateNewUser(BaseRepository):
             hashed_password=hashed_password,
             full_name=new_user.get("full_name"),
             email=new_user.get("email"),
+            is_active=is_active,
         )
         self.async_session.add(user)
-        await self.async_session.flush()
-        confirmation_email_code = ConfirmationEmailCode(
-            code=confirmation_code, user_relationship=user
-        )
-        self.async_session.add(confirmation_email_code)
-        await self.async_session.commit()
         return user
 
 

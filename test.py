@@ -42,3 +42,15 @@
 #
 # if __name__ == "__main__":
 #     main()
+import base64
+import hashlib
+
+import pyotp
+
+hash_object = hashlib.sha256("dima.sereda.d@gmail.com".encode())
+hex_dig = hash_object.hexdigest()
+user_secret = base64.b32encode(hex_dig.encode()).decode()
+totp = pyotp.TOTP(user_secret)
+code = totp.now()
+url = totp.provisioning_uri(name="dima.sereda.d@gmail.com", issuer_name="OZBooks")
+print(url)

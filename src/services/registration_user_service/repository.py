@@ -12,10 +12,12 @@ class RepositoryRegistrationUserService(AbstractRegistrationUserService):
         self.inserter = CreateNewUser(session)
 
     async def create_new_user(
-        self, new_user: UserRequest | RemoteUserInfoRequest, confirmation_code: int
+        self,
+        new_user: UserRequest | RemoteUserInfoRequest,
+        is_active: bool = False,
     ) -> User:
         new_user_record = await self.inserter.create_new(
-            new_user.model_dump(by_alias=False), confirmation_code
+            new_user.model_dump(by_alias=False), is_active
         )
         await self.session.flush([new_user_record])
         await self.session.refresh(new_user_record)

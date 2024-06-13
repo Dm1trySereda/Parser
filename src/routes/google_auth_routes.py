@@ -9,7 +9,7 @@ from src.services.auth_services.repository import RepositoryAuthUserService
 from src.services.authentication_faсade import AuthenticateUserFacade
 from src.services.authorization_facade import AuthorizationFacade
 from src.services.create_token_service.repository import LocalCreateTokenService
-from src.services.generate_otp_code_service.generate import GenerateOtpCodeService
+from src.services.generate_otp_code_service.generate import GenerateOTPCodeService
 from src.services.get_remote_token_service.google import GetGoogleTokenService
 from src.services.get_user_from_remote_service.google import GetGoogleUserInfoService
 from src.services.get_user_service.repository import RepositoryGetUserService
@@ -60,7 +60,7 @@ async def auth_google(code: str, request: Request):
             timeout=settings_send_mail.TIMEOUT,
         ),
         email_login=settings_send_mail.EMAIL_ADDRESS,
-        generate_otp_code_service=GenerateOtpCodeService(),
+        generate_otp_code_service=GenerateOTPCodeService(),
         update_user_info_service=RepositoryUpdateUserInfoService(request.state.db),
     )
     return await authenticate_facade.authentication_with_code(code, "Google")

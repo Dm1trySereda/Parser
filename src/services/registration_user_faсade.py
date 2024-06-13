@@ -3,7 +3,7 @@ from fastapi import HTTPException, status
 from src.request_shemas.users import UserRequest
 from src.response_schemas.users import UserResponse
 from src.services.generate_otp_code_service.generate import (
-    AbstractGenerateOtpCodeService,
+    AbstractGenerateOTPCodeService,
 )
 from src.services.get_user_service.abc import AbstractGetUserService
 from src.services.registration_user_service.abc import AbstractRegistrationUserService
@@ -16,7 +16,7 @@ class RegistrationUserFacade:
         search_services: AbstractGetUserService,
         registration_services: AbstractRegistrationUserService,
         send_mail_service: AbstractSendMailService,
-        generate_otp_code_service: AbstractGenerateOtpCodeService,
+        generate_otp_code_service: AbstractGenerateOTPCodeService,
         email_login: str,
     ):
         self.search_services = search_services
@@ -43,18 +43,20 @@ class RegistrationUserFacade:
                 detail="This email address is already in use maybe you need to auth",
             )
         else:
-            confirmation_code = await self.generate_otp_code_service.generate_code()
+            generate = await self.generate_otp_code_service.generate_qrcode(
+                recipient_email=new_user.email
+            )
             with open("src/templates/registration_mail.html", "r") as file:
                 registration_mail = file.read()
-                email_content = registration_mail.format(
-                    confirmation_code=confirmation_code, recipient_email=new_user.email
-                )
+                email_content = registration_mail.format(recipient_email=new_user.email)
                 await self.send_mail_service.send_mail(
                     sender_email=self._email_login,
                     recipient_email=new_user.email,
-                    email=email_content,
+                    email_body=email_content,
+                    qrcode=generate.qrcode,
                 )
+
             new_user_record = await self.registration_services.create_new_user(
-                new_user=new_user, confirmation_code=confirmation_code
+                new_user=new_user
             )
             return new_user_record

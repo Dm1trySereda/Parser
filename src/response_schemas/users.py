@@ -36,3 +36,9 @@ class Token(BaseResponseModel):
 
 class RemoteToken(Token):
     provider: str
+
+
+class OneTimePassword(BaseResponseModel):
+    user_email: Annotated[EmailStr | None, Field()]
+    user_secret: Annotated[str, Field()]
+    qrcode: Annotated[str, Field()]

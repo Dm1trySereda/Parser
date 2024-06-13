@@ -17,7 +17,7 @@ from src.services.authentication_faсade import AuthenticateUserFacade
 from src.services.authorization_facade import AuthorizationFacade
 from src.services.create_token_service.repository import LocalCreateTokenService
 from src.services.email_verification_facade import EmailVerificationFacade
-from src.services.generate_otp_code_service.generate import GenerateOtpCodeService
+from src.services.generate_otp_code_service.generate import GenerateOTPCodeService
 from src.services.get_remote_token_service.google import GetGoogleTokenService
 from src.services.get_user_from_remote_service.google import GetGoogleUserInfoService
 from src.services.get_user_service.repository import RepositoryGetUserService
@@ -65,7 +65,7 @@ async def login(
             timeout=settings_send_mail.TIMEOUT,
         ),
         email_login=settings_send_mail.EMAIL_ADDRESS,
-        generate_otp_code_service=GenerateOtpCodeService(),
+        generate_otp_code_service=GenerateOTPCodeService(),
         update_user_info_service=RepositoryUpdateUserInfoService(request.state.db),
     )
     return await authenticate_facade.authentication(form_data)
@@ -89,7 +89,7 @@ async def registration(request: Request, new_user: Annotated[UserRequest, Depend
             timeout=settings_send_mail.TIMEOUT,
         ),
         email_login=settings_send_mail.EMAIL_ADDRESS,
-        generate_otp_code_service=GenerateOtpCodeService(),
+        generate_otp_code_service=GenerateOTPCodeService(),
     )
 
     return await regis_facade.registration_user(new_user)
@@ -109,8 +109,11 @@ async def confirmation(
     confirmation_facade = EmailVerificationFacade(
         update_user_info_service=RepositoryUpdateUserInfoService(request.state.db),
         get_user_service=RepositoryGetUserService(request.state.db),
+        generate_otp_code_service=GenerateOTPCodeService(),
     )
-    await confirmation_facade.verify_email(code=confirmation_code, email=user.email)
+    await confirmation_facade.verify_email(
+        user_confirmation_code=confirmation_code, recipient_email=user.email
+    )
     return user
 
 
