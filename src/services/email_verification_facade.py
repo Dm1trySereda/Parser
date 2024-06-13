@@ -23,8 +23,7 @@ class EmailVerificationFacade:
         recipient_email: EmailStr,
     ):
         generate = await self.generate_otp_code_service.generate_qrcode(recipient_email)
-        print(generate.confirmation_code)
-        if user_confirmation_code == generate.confirmation_code:
+        if user_confirmation_code == generate.otp_code:
             await self.update_user_info_service.update_info(email=recipient_email)
         else:
             raise HTTPException(

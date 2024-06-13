@@ -42,3 +42,4 @@ class OneTimePassword(BaseResponseModel):
     user_email: Annotated[EmailStr | None, Field()]
     user_secret: Annotated[str, Field()]
     qrcode: Annotated[str, Field()]
+    otp_code: Annotated[int, Field()]
