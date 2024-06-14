@@ -32,6 +32,7 @@ from src.services.update_user_info_service.repository import (
 from src.services.validate_token_service.repository import (
     RepositoryValidateTokenService,
 )
+from src.services.render_template_service.render import RenderTemplateService
 
 user_routes = APIRouter(tags=["Users"])
 auth_facade = AuthorizationFacade(
@@ -90,6 +91,7 @@ async def registration(request: Request, new_user: Annotated[UserRequest, Depend
         ),
         email_login=settings_send_mail.EMAIL_ADDRESS,
         generate_otp_code_service=GenerateOTPCodeService(),
+        render_template_service=RenderTemplateService(),
     )
 
     return await regis_facade.registration_user(new_user)

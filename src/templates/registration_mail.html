@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <title>Подтверждение регистрации на OZBooks</title>
     <style>
-        body {{
+        body {
             background-color: #fafafa;
             font-family: Arial, sans-serif;
             color: #333;
-        }}
-        .email-content {{
+        }
+        .email-content {
             text-align: start;
             max-width: 600px;
             margin: 0 auto;
@@ -18,36 +18,34 @@
             background-color: #ffffff;
             border-radius: 15px;
             box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.1);
-        }}
-        .brand {{
+        }
+        .brand {
             color: #25a2b8;
             font-size: 16px;
             font-weight: bold;
-        }}
-        .code {{
+        }
+        .code {
             font-size: 20px;
             color: #25a2b8;
             font-weight: bold;
             background-color: #f2f2f2;
             padding: 10px;
             border-radius: 5px;
-        }}
-        .text {{
+        }
+        .text {
             font-size: 16px;
-        }}
+        }
     </style>
 </head>
 <body>
 <div class="email-content">
-    <p class="text">Здравствуйте,</p>
-    <p class="text">Вы указали свою электронную почту {recipient_email} для регистрации на сайте <span
-            class="brand">OZBooks</span>.<br>
-        Для завершения процесса регистрации, пожалуйста, подтвердите свою почту,<br> сканируйте QR-код с
-        помощью
-        вашего приложения для аутентификации</p>
+    <h1 class="text">Добро пожаловать на OZBooks, {{ recipient_email }}!</h1>
+    <p class="text">Cпасибо за регистрацию на нашем сайте.</p>
+    <p class="text">Остался всего один шаг до завершения регистрации. Мы отправили вам QR-код во вложении к этому
+        письму. Сканируйте его при помощи приложения аутентификации для подтверждения своего аккаунта. </p>
     <p class="text">Если вы не регистрировались на сайте OZBooks, пожалуйста, проигнорируйте это письмо.</p>
-    <p class="text">С уважением,<br>
-        Команда OZBooks</p>
+    <p class="text">С уважением,
+        <br>Команда OZBooks</p>
 </div>
 </body>
 </html>
