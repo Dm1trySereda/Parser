@@ -14,17 +14,20 @@ from .db_configs import setting_db
 
 class DatabaseHelper:
     def __init__(self, url: str, echo: bool = False):
-        self.engine = create_async_engine(url, echo=echo)
-        self.session_manager = async_sessionmaker(
-            bind=self.engine, autoflush=False, autocommit=False, expire_on_commit=False
+        self.async_engine = create_async_engine(url, echo=echo)
+        self.async_session_manager = async_sessionmaker(
+            bind=self.async_engine,
+            autoflush=False,
+            autocommit=False,
+            expire_on_commit=False,
         )
 
     def get_scoped_session(self):
-        return async_scoped_session(self.session_manager, scopefunc=current_task)
+        return async_scoped_session(self.async_session_manager, scopefunc=current_task)
 
     @asynccontextmanager
     async def get_db_session(self):
-        session: AsyncSession = self.session_manager()
+        session: AsyncSession = self.async_session_manager()
         try:
             yield session
             await session.commit()

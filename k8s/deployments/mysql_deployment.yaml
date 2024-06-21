@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-mysql-deployment
+  labels:
+    app: db-mysql-deployment
+spec:
+  selector:
+    matchLabels:
+      app: db-mysql
+  template:
+    metadata:
+      labels:
+        app: db-mysql
+    spec:
+      containers:
+        - name: db-mysql
+          image: mysql:8.0
+          envFrom:
+            - configMapRef:
+                name: app-config
+            - secretRef:
+                name: app-secrets
+          ports:
+            - containerPort: 3306
+          args:
+            - --default-authentication-plugin=mysql_native_password

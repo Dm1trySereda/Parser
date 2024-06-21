@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from celery_worker.config.celery_configs import parser
 from src.config.database.db_helpers import db_helper
 from src.request_shemas.parser_book import ParserBook
-from src.services.add_new_book_service.repository import RepositoryAddNewBookService
+from src.services.create_new_book_service.repository import RepositoryAddNewBookService
 from src.services.delete_inactive_user_service.repository import (
     RepositoryDeleteInactiveUserService,
 )
@@ -25,7 +25,7 @@ parser.conf.timezone = "Europe/Moscow"
 parser.conf.beat_schedule = {
     "run-every-10-minutes": {
         "task": "add_books_group",
-        "schedule": crontab(minute="*/10"),
+        "schedule": crontab(minute="*/2"),
     }
 }
 
@@ -49,8 +49,8 @@ def create_or_update_books(pages: list) -> None:
                 update_history_services=RepositoryUpdateHistoryService(async_session),
             )
             for books in pages:
-                if not pages:
-                    raise ValueError("Page not found")
+                if not books:
+                    continue
                 for book in books:
                     try:
                         valid_book = ParserBook.parse_obj(book)

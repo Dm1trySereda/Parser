@@ -1,0 +1,44 @@
+1) minikube start --memory 4096 --cpus 3
+2) minikube addons enable registry - Включение внутреннего реестра minikube
+3) minikube addons list - Выведет список всех дополнений, убеимся что стоит плашка напротив registry
+
+Создание образа и отправка его в minikube docker registry
+1) eval $(minikube -p minikube docker-env) - подключение к Docker CLI внутри minikube
+2) docker build --target celery-stage -t localhost:5000/celery_image:v1 . - собираем образ из dockerdile multistage (точка - текущий директорий)
+3) docker run -it celery_image /bin/bash - запустит docker container с возможностью просмотра содержимого
+4) kubectl port-forward svc/registry -n kube-system 5000:5000 & - перенаправим 5000 порт локального хоста на 5000 порт сервиса registry в кластере
+5) docker push localhost:5000/celery_image - запушим в minikube docker registry
+6) kubectl port-forward --namespace kube-system service/registry 5000:80 - настроим порт для доступа к локальному реестру Minikube
+7) curl http://localhost:5000/v2/_catalog - просмотр образов
+
+
+1) создать манифесты для каждого образа (.yaml)
+2) kubectl apply -f k8s/- применить все манифесты
+3) kubectl get deployments - проверка статуса деплоиментов
+4) kubectl get services - проверка статуса  сервисов
+5) kubectl get pods - проверка статуса подов
+6) kubectl logs celery-services-7d6567f664-fdcq5 - просмотр логов отдельного пода
+7) kubectl port-forward service/fastapi-service 8000:8000 - для доступа к серисам
+
+
+Можно создать свое доменное имя через ingress:
+1) minikube addons enable ingress
+2) создать файл ingress.yaml c доменным именем (oz-books.com)
+3) сat /etc/hosts - проверить что хост добавлен
+4) sudo nano /etc/hosts - если нет - добавить вручную и сохранить изменения
+
+
+Для работы alembic
+ 1) kubectl port-forward svc/db-mysql-service 3306:3306
+
+HorizontalPodAutoscaler - Горизонтальное масштабирование (автоматическое изменение количества подов в зависимости от нагрузки)
+1) Указать minReplicas: 1  и  maxReplicas: 5, targetCPUUtilizationPercentage: 80  (при нагрузке более 80% будет создана реплика)
+
+Обновление приложения
+1) docker build --target celery-stage -t localhost:5000/celery_image:v2 . - сборка нового образа
+2) kubectl port-forward svc/registry -n kube-system 5000:5000 & - перенаправим 5000 порт локального хоста на 5000 порт сервиса registry в кластере
+3) docker push localhost:5000/celery_image:v2 - запуушить образ в regstry
+4) kubectl set image deployment/celery-deployment celery-container=localhost:5000/celery_image:v2 - обновление deployment новым образом для контейнера  celery-container
+5) kubectl rollout undo deployment/celery-deployment - откат к предыдущей версии
+
+

@@ -8,8 +8,8 @@ from src.enums.role import UserRoleEnum
 from src.models.users import User
 from src.request_shemas.books import BookIn
 from src.response_schemas.books import BookOuts
-from src.services.add_new_book_facade import AddNewBookFacade
-from src.services.add_new_book_service.repository import RepositoryAddNewBookService
+from src.services.create_new_book_facade import AddNewBookFacade
+from src.services.create_new_book_service.repository import RepositoryAddNewBookService
 from src.services.authorization_facade import AuthorizationFacade
 from src.services.delete_book_faсade import DeleteBookFacade
 from src.services.delete_book_service.repository import RepositoryDeleteBookService
@@ -26,13 +26,13 @@ from src.services.validate_token_service.repository import (
     RepositoryValidateTokenService,
 )
 
-book_router = APIRouter(tags=["Books"])
+book_routers = APIRouter(tags=["Books"])
 auth_facade = AuthorizationFacade(
     validate_token_service_service=RepositoryValidateTokenService()
 )
 
 
-@book_router.get(
+@book_routers.get(
     "/books/search",
     status_code=status.HTTP_200_OK,
     response_description="Search successful",
@@ -59,7 +59,7 @@ async def search_books(
     return [BookOuts.parse_obj(books.__dict__) for books in search_result]
 
 
-@book_router.get(
+@book_routers.get(
     "/books/",
     status_code=status.HTTP_200_OK,
     response_description="Search successful",
@@ -85,7 +85,7 @@ async def get_books_on_page(
     return [BookOuts.parse_obj(books.__dict__) for books in page]
 
 
-@book_router.post(
+@book_routers.post(
     "/books/create",
     status_code=status.HTTP_201_CREATED,
     response_model=BookOuts,
@@ -109,7 +109,7 @@ async def add_book(
     return new_book
 
 
-@book_router.put(
+@book_routers.put(
     "/books/edit",
     status_code=status.HTTP_200_OK,
     response_model=BookOuts,
@@ -133,7 +133,7 @@ async def change_book(
     return updated_book
 
 
-@book_router.delete(
+@book_routers.delete(
     "/books/remove",
     status_code=status.HTTP_202_ACCEPTED,
     response_description="Book deleted",

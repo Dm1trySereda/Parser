@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.users import User
-from src.repository.users import SearchUser
+from src.repositories.users import SearchUser
 from src.services.get_user_service.abc import AbstractGetUserService
 
 

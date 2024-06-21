@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.repository.users import AddAuthProvider
+from src.repositories.users import AddAuthProvider
 from src.request_shemas.users import RemoteUserInfoRequest
 from src.services.auth_provider_registration_user_service.abc import (
     AbstractAuthProviderRegistrationUserService,

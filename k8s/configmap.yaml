@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  BROKER_URL: "amqp://rabbitmq-service:5672//"
+  RESULT_BACKEND: "redis://redis-service:6379/0"
+
+  ALGORITHM: "HS256"
+  ACCESS_TOKEN_EXPIRE_MINUTES: "30"
+
+  MYSQL_HOST: "db-mysql-service"
+  MYSQL_PORT: "3306"
+  MYSQL_DATABASE: "library"
+
+  GOOGLE_REDIRECT_URL: "http://localhost:8000"
+
+  EMAIL_ADDRESS: "booksoz@yandex.ru"
+  SMTP_HOST: "smtp.yandex.ru"
+  SMTP_PORT: "587"
+  TIMEOUT: "10"

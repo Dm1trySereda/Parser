@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models import Book
-from src.repository.books import UpdateBook
+from src.repositories.books import UpdateBook
 from src.request_shemas.books import BookIn
 from src.services.update_book_service.abc import AbstractUpdateBookService
 

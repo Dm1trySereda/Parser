@@ -88,7 +88,7 @@ class AuthorizationFacade:
             if user.is_active is False:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail=f"You need to confirm your credentials, check your email:{user.email}",
+                    detail=f"You need to confirm your credentials, check your email",
                 )
             if role_association.get(user.role_id) not in [role.value for role in roles]:
                 raise HTTPException(

@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.users import User
-from src.repository.users import CreateNewUser
+from src.repositories.users import CreateNewUser
 from src.request_shemas.users import RemoteUserInfoRequest, UserRequest
 from src.services.registration_user_service.abc import AbstractRegistrationUserService
 

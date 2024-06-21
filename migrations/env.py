@@ -3,13 +3,9 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
+from migrations.base import *
 from src.config.database.db_helpers import setting_db
 from src.models.base import Base
-
-# from src.models.role import Role
-from src.models.books import Book
-from src.models.history import History
-from src.models.users import AuthProvider, ConfirmationEmailCode, Role, User
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -20,7 +16,15 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option("sqlalchemy.url", setting_db.database_url)
+# for async connection
+# config.set_main_option(
+#     "sqlalchemy.url", setting_db.async_database_url + "?async_fallback=True"
+# )
+
+# for sync connection
+config.set_main_option(
+    "sqlalchemy.url", setting_db.database_url
+)
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
