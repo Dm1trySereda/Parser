@@ -608,6 +608,16 @@ files = [
 ]
 
 [[package]]
+name = "dirt-tongue"
+version = "0.1.2"
+description = "search russian dirty word"
+optional = false
+python-versions = "*"
+files = [
+    {file = "dirt_tongue-0.1.2.tar.gz", hash = "sha256:88d8c5ab3d041469d21640b0eab1768f90e2d8e20799fd59276240b94e826f44"},
+]
+
+[[package]]
 name = "dnspython"
 version = "2.6.1"
 description = "DNS toolkit"
@@ -2982,4 +2992,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "d166cfbaa3136c9431fa31f42b6e2fde3cc688bb139cca7bb5e2997ea20797a9"
+content-hash = "f751f58709eec6ae45770a9ceb04aca8d618accff8648fcd4a7783a52b6492c8"

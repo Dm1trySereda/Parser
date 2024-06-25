@@ -28,4 +28,4 @@ class PaginationFacade:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Page not found"
             )
-        return page
+        return [BookOuts.parse_obj(books.__dict__) for books in page]

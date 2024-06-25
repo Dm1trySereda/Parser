@@ -42,15 +42,37 @@
 #
 # if __name__ == "__main__":
 #     main()
-import base64
-import hashlib
+# import base64
+# import hashlib
+#
+# import pyotp
+#
+# hash_object = hashlib.sha256("dima.sereda.d@gmail.com".encode())
+# hex_dig = hash_object.hexdigest()
+# user_secret = base64.b32encode(hex_dig.encode()).decode()
+# totp = pyotp.TOTP(user_secret)
+# code = totp.now()
+# url = totp.provisioning_uri(name="dima.sereda.d@gmail.com", issuer_name="OZBooks")
+# print(url)
 
-import pyotp
-
-hash_object = hashlib.sha256("dima.sereda.d@gmail.com".encode())
-hex_dig = hash_object.hexdigest()
-user_secret = base64.b32encode(hex_dig.encode()).decode()
-totp = pyotp.TOTP(user_secret)
-code = totp.now()
-url = totp.provisioning_uri(name="dima.sereda.d@gmail.com", issuer_name="OZBooks")
-print(url)
+standart_dirt = [
+    1093,
+    1091,
+    1081,
+    124,
+    1073,
+    1083,
+    1103,
+    124,
+    1077,
+    1073,
+    124,
+    1087,
+    1080,
+    1079,
+    1076,
+    124,
+    1105,
+    1073,
+]
+print(chr(n) for n in standart_dirt)

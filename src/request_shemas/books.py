@@ -27,8 +27,6 @@ class BookIn(BaseRequestModel):
     @field_validator("title", "author")
     @classmethod
     def validate(cls, value):
-        # if predict([value])[0] == 1:
-        #     raise ValueError("The field contains forbidden words.")
 
         if not re.match(r"^[a-zA-Zа-яА-Я0-9\s(),'\"]*$", value):
             raise ValueError("The field cannot contain special symbols.")

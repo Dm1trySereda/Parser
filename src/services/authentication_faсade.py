@@ -16,8 +16,6 @@ from src.services.get_user_from_remote_service.abc import (
 )
 from src.services.get_user_service.abc import AbstractGetUserService
 from src.services.registration_user_service.abc import AbstractRegistrationUserService
-from src.services.send_mail_service.abc import AbstractSendMailService
-from src.services.update_user_info_service.abc import AbstractUpdateUserInfoService
 
 
 class AuthenticateUserFacade:
@@ -29,11 +27,8 @@ class AuthenticateUserFacade:
         get_user_info_from_remote_service: AbstractGetUserInfoFromRemoteService,
         get_user_service: AbstractGetUserService,
         registration_user_service: AbstractRegistrationUserService,
-        update_user_info_service: AbstractUpdateUserInfoService,
         auth_provider_registration_user_service: AbstractAuthProviderRegistrationUserService,
         generate_otp_code_service: AbstractGenerateOTPCodeService,
-        send_mail_service: AbstractSendMailService,
-        email_login: str,
     ):
 
         self.auth_service = auth_service
@@ -42,13 +37,10 @@ class AuthenticateUserFacade:
         self.get_user_info_from_remote_service = get_user_info_from_remote_service
         self.get_user_service = get_user_service
         self.registration_user_service = registration_user_service
-        self.update_user_info_service = update_user_info_service
         self.auth_provider_registration_user_service = (
             auth_provider_registration_user_service
         )
         self.generate_otp_code_service = generate_otp_code_service
-        self.send_mail_service = send_mail_service
-        self._email_login = email_login
 
     async def authentication(self, form_data) -> Token:
         user = await self.auth_service.authenticate_user(

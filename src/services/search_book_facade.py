@@ -52,4 +52,5 @@ class BookSearchFacadeServices:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Book not found"
             )
-        return book_search_result
+
+        return [BookOuts.parse_obj(book.__dict__) for book in book_search_result]

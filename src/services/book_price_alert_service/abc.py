@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
-from src.response_schemas.history import HistoryOut
+from src.models import History
 
 
 class AbstractBookPriceAlertService(ABC):
     @abstractmethod
-    async def get_price(self) -> list[HistoryOut]:
+    async def get_price(self) -> list[History]:
         pass

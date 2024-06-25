@@ -1,7 +1,7 @@
 from fastapi import HTTPException, status
 
+from src.models import Book
 from src.request_shemas.books import BookIn
-from src.response_schemas.books import BookOuts
 from src.services.search_book_service.abc import AbstractSearchBookService
 from src.services.update_book_service.abc import AbstractUpdateBookService
 from src.services.update_history_service.abc import AbstractUpdateHistoryService
@@ -18,10 +18,12 @@ class UpdateBookFacade:
         self.updater = updater_services
         self.history_inserter = history_updater_services
 
-    async def update_book(self, book: BookIn) -> BookOuts:
-        existing_book = await self.searcher.search(book_num=book.book_num)
+    async def update_book(self, current_book: BookIn) -> Book:
+        existing_book = await self.searcher.search(book_num=current_book.book_num)
         if existing_book:
-            update_book = await self.updater.update(*existing_book, book)
+            update_book = await self.updater.update(
+                existing_book=existing_book[0], current_book=current_book
+            )
             await self.history_inserter.update_history()
         else:
             raise HTTPException(

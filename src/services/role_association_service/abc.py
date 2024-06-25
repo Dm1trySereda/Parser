@@ -1,7 +1,5 @@
 from abc import ABC, abstractmethod
 
-from src.models.users import Role
-
 
 class AbstractRoleAssociationService(ABC):
     @abstractmethod

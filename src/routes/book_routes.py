@@ -56,7 +56,7 @@ async def search_books(
         search_book_service=RepositorySearchBookService(request.state.db)
     )
     search_result = await searcher.search_book(book_id, book_num, title, author)
-    return [BookOuts.parse_obj(books.__dict__) for books in search_result]
+    return search_result
 
 
 @book_routers.get(
@@ -82,7 +82,7 @@ async def get_books_on_page(
     )
     page = await paginator.paginate(page, books_quantity, sort_by, order_asc)
 
-    return [BookOuts.parse_obj(books.__dict__) for books in page]
+    return page
 
 
 @book_routers.post(

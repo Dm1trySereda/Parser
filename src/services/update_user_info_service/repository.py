@@ -1,7 +1,7 @@
 from pydantic import EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.repositories.users import UpdateUserInformation
+from src.repository.users import UpdateUserInformation
 from src.services.update_user_info_service.abc import AbstractUpdateUserInfoService
 
 

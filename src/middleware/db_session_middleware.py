@@ -1,4 +1,4 @@
-from starlette.requests import Request
+from fastapi import Request
 
 from src.config.database.db_helpers import db_helper
 

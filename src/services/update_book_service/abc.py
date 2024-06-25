@@ -7,5 +7,5 @@ from src.response_schemas.books import BookOuts
 
 class AbstractUpdateBookService(ABC):
     @abstractmethod
-    async def update(self, existing_book, book: BookIn) -> BookOuts | None:
+    async def update(self, existing_book: Book, current_book: BookIn) -> Book | None:
         pass

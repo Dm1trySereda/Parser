@@ -15,7 +15,7 @@ from src.services.auth_provider_registration_user_service.repository import (
 from src.services.auth_services.repository import RepositoryAuthUserService
 from src.services.authentication_faсade import AuthenticateUserFacade
 from src.services.authorization_facade import AuthorizationFacade
-from src.services.create_token_service.repository import LocalCreateTokenService
+from src.services.create_token_service.create_local_token import LocalCreateTokenService
 from src.services.email_verification_facade import EmailVerificationFacade
 from src.services.generate_otp_code_service.generate import GenerateOTPCodeService
 from src.services.get_remote_token_service.google import GetGoogleTokenService
@@ -58,16 +58,7 @@ async def login(
         auth_provider_registration_user_service=RepositoryAuthProviderRegistrationUserService(
             request.state.db
         ),
-        send_mail_service=SendMailService(
-            email_login=settings_send_mail.EMAIL_ADDRESS,
-            email_password=settings_send_mail.APPLICATION_PASSWORD,
-            smtp_host=settings_send_mail.SMTP_HOST,
-            smtp_port=settings_send_mail.SMTP_PORT,
-            timeout=settings_send_mail.TIMEOUT,
-        ),
-        email_login=settings_send_mail.EMAIL_ADDRESS,
         generate_otp_code_service=GenerateOTPCodeService(),
-        update_user_info_service=RepositoryUpdateUserInfoService(request.state.db),
     )
     return await authenticate_facade.authentication(form_data)
 
@@ -110,7 +101,6 @@ async def confirmation(
 ):
     confirmation_facade = EmailVerificationFacade(
         update_user_info_service=RepositoryUpdateUserInfoService(request.state.db),
-        get_user_service=RepositoryGetUserService(request.state.db),
         generate_otp_code_service=GenerateOTPCodeService(),
     )
     await confirmation_facade.verify_email(

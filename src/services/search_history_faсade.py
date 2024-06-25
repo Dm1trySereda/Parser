@@ -47,8 +47,8 @@ class HistorySearchFacadeServices:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="This book has no story"
             )
-        return history_search
+        return [HistoryOut.parse_obj(books.__dict__) for books in history_search]
 
     async def get_cheap_books(self) -> list[HistoryOut]:
         cheap_books = await self.book_price_alert.get_price()
-        return cheap_books
+        return [HistoryOut.parse_obj(book.__dict__) for book in cheap_books]

@@ -12,6 +12,5 @@ class RenderTemplateService(AbstractRenderTemplateService):
         )
         template = env.get_template(template)
         email_content = template.render({"recipient_email": value})
-        template = env.get_template("registration_mail.html")
         print(template.render())
         return email_content

@@ -7,7 +7,7 @@
 2) docker build --target celery-stage -t localhost:5000/celery_image:v1 . - собираем образ из dockerdile multistage (точка - текущий директорий)
 3) docker run -it celery_image /bin/bash - запустит docker container с возможностью просмотра содержимого
 4) kubectl port-forward svc/registry -n kube-system 5000:5000 & - перенаправим 5000 порт локального хоста на 5000 порт сервиса registry в кластере
-5) docker push localhost:5000/celery_image - запушим в minikube docker registry
+5) docker push localhost:5000/celery_image:v1 - запушим в minikube docker registry
 6) kubectl port-forward --namespace kube-system service/registry 5000:80 - настроим порт для доступа к локальному реестру Minikube
 7) curl http://localhost:5000/v2/_catalog - просмотр образов
 
@@ -29,7 +29,7 @@
 
 
 Для работы alembic
- 1) kubectl port-forward svc/db-mysql-service 3306:3306
+1) kubectl port-forward svc/db-mysql-service 3306:3306
 
 HorizontalPodAutoscaler - Горизонтальное масштабирование (автоматическое изменение количества подов в зависимости от нагрузки)
 1) Указать minReplicas: 1  и  maxReplicas: 5, targetCPUUtilizationPercentage: 80  (при нагрузке более 80% будет создана реплика)

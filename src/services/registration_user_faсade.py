@@ -2,6 +2,8 @@ from fastapi import HTTPException
 from fastapi import status
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+from src.models.users import User
 from src.request_shemas.users import UserRequest
 from src.response_schemas.users import UserResponse
 from src.services.generate_otp_code_service.generate import (
@@ -30,7 +32,7 @@ class RegistrationUserFacade:
         self._email_login = email_login
         self.render_template_service = render_template_service
 
-    async def registration_user(self, new_user: UserRequest) -> UserResponse:
+    async def registration_user(self, new_user: UserRequest) -> User:
         current_user_by_username = await self.search_services.get_current_user(
             username=new_user.username
         )

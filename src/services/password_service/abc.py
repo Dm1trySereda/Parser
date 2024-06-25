@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class AbstractCreatePasswordService(ABC):
+class AbstractPasswordManagerService(ABC):
     @abstractmethod
     async def get_password_hash(self, password: str):
         pass

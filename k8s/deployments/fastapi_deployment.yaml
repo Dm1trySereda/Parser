@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: fastapi-container
-          image: localhost:5000/fastapi_image:latest
+          image: localhost:5000/fastapi_image:v1
           envFrom:
             - configMapRef:
                 name: app-config

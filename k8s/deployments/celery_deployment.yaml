@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: celery-container
-          image: localhost:5000/celery_image:latest
+          image: localhost:5000/celery_image:v1
           envFrom:
             - configMapRef:
                 name: app-config

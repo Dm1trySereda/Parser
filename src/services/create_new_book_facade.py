@@ -1,5 +1,6 @@
 from fastapi import HTTPException, status
 
+from src.models import Book
 from src.request_shemas.books import BookIn
 from src.response_schemas.books import BookOuts
 from src.services.create_new_book_service.abc import AbstractAddNewBookService
@@ -18,7 +19,7 @@ class AddNewBookFacade:
         self.inserter = inserter_services
         self.history_inserter = history_updater_services
 
-    async def add_new_book(self, new_book: BookIn) -> BookOuts:
+    async def add_new_book(self, new_book: BookIn) -> Book:
         current_books = await self.searcher.search(book_num=new_book.book_num)
         if not current_books:
             new_book_record = await self.inserter.add_new_book(new_book)

@@ -6,21 +6,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.models.base import Base
 
 
-# class ConfirmationEmailCode(Base):
-#     __tablename__ = "confirmation_email_codes"
-#
-#     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-#     code: Mapped[str] = mapped_column(String(length=1024), nullable=True)
-#     user_id: Mapped[int] = mapped_column(
-#         ForeignKey("users.id", ondelete="CASCADE"), nullable=False
-#     )
-#
-#     user_relationship = relationship(
-#         "User",
-#         back_populates="confirmation_email_code",
-#     )
-
-
 class AuthProvider(Base):
     __tablename__ = "auth_provider_users"
 
@@ -81,9 +66,3 @@ class User(Base):
         cascade="all, delete-orphan",
         uselist=False,
     )
-    # confirmation_email_code = relationship(
-    #     "ConfirmationEmailCode",
-    #     back_populates="user_relationship",
-    #     cascade="all, delete-orphan",
-    #     uselist=False,
-    # )

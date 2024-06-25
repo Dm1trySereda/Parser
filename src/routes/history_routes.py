@@ -32,23 +32,25 @@ auth_facade = AuthorizationFacade(
 )
 async def show_history(
     request: Request,
+    user: User = Depends(
+        auth_facade.get_permissions_checker(
+            roles=[UserRoleEnum.admin, UserRoleEnum.subadmin]
+        )
+    ),
 ):
     searcher = HistorySearchFacadeServices(
         search_history_service=RepositorySearchHistoryService(request.state.db),
         book_price_alert=RepositoryBookPriceAlertService(request.state.db),
     )
     cheap_books = await searcher.get_cheap_books()
-    result = [
-        HistoryOut.parse_obj(book.__dict__).dict(by_alias=False) for book in cheap_books
-    ]
-    return result
+    return cheap_books
 
 
 #
 @history_routes.get(
     "/history/search",
     status_code=status.HTTP_200_OK,
-    response_model=HistoryOut | list[HistoryOut],
+    response_model=list[HistoryOut],
     response_description="Search book history successfully",
 )
 async def get_history_for_book(
@@ -69,4 +71,4 @@ async def get_history_for_book(
     )
 
     books_history = await searcher.search_history(book_id, book_num, title, author)
-    return [HistoryOut.parse_obj(books.__dict__) for books in books_history]
+    return books_history

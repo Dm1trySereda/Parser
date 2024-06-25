@@ -2,7 +2,6 @@ from fastapi import HTTPException, status
 from pydantic import EmailStr
 
 from src.services.generate_otp_code_service.abc import AbstractGenerateOTPCodeService
-from src.services.get_user_service.abc import AbstractGetUserService
 from src.services.update_user_info_service.abc import AbstractUpdateUserInfoService
 
 
@@ -10,11 +9,9 @@ class EmailVerificationFacade:
     def __init__(
         self,
         update_user_info_service: AbstractUpdateUserInfoService,
-        get_user_service: AbstractGetUserService,
         generate_otp_code_service: AbstractGenerateOTPCodeService,
     ):
         self.update_user_info_service = update_user_info_service
-        self.get_user_service = get_user_service
         self.generate_otp_code_service = generate_otp_code_service
 
     async def verify_email(
