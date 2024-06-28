@@ -14,8 +14,8 @@ class BookIn(BaseRequestModel):
     book_num: Annotated[int, Field(ge=1, example=123)]
     title: Annotated[str, Field(min_length=2, example="Something title")]
     author: Annotated[str, Field(min_length=2, example="Something author")]
-    price_new: Annotated[float, Field(ge=0, example=19.99)]
-    price_old: Annotated[float | None, Field(ge=0, example=17.99)] = None
+    price_new: Annotated[float, Field(ge=0, example=17.99)]
+    price_old: Annotated[float | None, Field(ge=0, example=19.99)] = None
     discount: Annotated[
         str | None, Field(min_length=2, max_length=4, example="10%")
     ] = None

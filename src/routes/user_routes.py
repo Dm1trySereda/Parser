@@ -130,7 +130,7 @@ async def registration(request: Request, new_user: Annotated[UserRequest, Depend
 @user_routes.post(
     "/users/verify-email",
     status_code=status.HTTP_200_OK,
-    response_model=UserVerifyEmail,
+    response_model=UserResponse,
     response_description="email confirmed",
 )
 async def confirmation(
