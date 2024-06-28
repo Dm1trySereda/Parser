@@ -1,8 +1,14 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, status, HTTPException
 from starlette.requests import Request
 
+from src.custom_exceptions.exseptions import (
+    ResultError,
+    ProvidingParametersError,
+    BookHistoryError,
+)
+from src.enums.history import HistorySortChoices
 from src.enums.role import UserRoleEnum
 from src.models.users import User
 from src.response_schemas.history import HistoryOut
@@ -32,6 +38,10 @@ auth_facade = AuthorizationFacade(
 )
 async def show_history(
     request: Request,
+    page: Annotated[int, Query(qe=1)] = 1,
+    books_quantity: Annotated[int, Query(qe=10)] = None,
+    sort_by: Annotated[HistorySortChoices, Query()] = HistorySortChoices.title,
+    order_asc: Annotated[bool, Query()] = False,
     user: User = Depends(
         auth_facade.get_permissions_checker(
             roles=[UserRoleEnum.admin, UserRoleEnum.subadmin]
@@ -42,7 +52,12 @@ async def show_history(
         search_history_service=RepositorySearchHistoryService(request.state.db),
         book_price_alert=RepositoryBookPriceAlertService(request.state.db),
     )
-    cheap_books = await searcher.get_cheap_books()
+    try:
+        cheap_books = await searcher.get_cheap_books(
+            page, books_quantity, sort_by, order_asc
+        )
+    except ResultError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
     return cheap_books
 
 
@@ -69,6 +84,14 @@ async def get_history_for_book(
         search_history_service=RepositorySearchHistoryService(request.state.db),
         book_price_alert=RepositoryBookPriceAlertService(request.state.db),
     )
+    try:
 
-    books_history = await searcher.search_history(book_id, book_num, title, author)
+        books_history = await searcher.search_history(book_id, book_num, title, author)
+    except ProvidingParametersError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=e.message,
+        )
+    except BookHistoryError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
     return books_history

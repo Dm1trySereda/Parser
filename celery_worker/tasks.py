@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError
 
 from celery_worker.config.celery_configs import parser
 from src.config.database.db_helpers import db_helper
-from src.request_shemas.parser_book import ParserBook
+from src.request_shemas.books import ParserBook
 from src.services.create_new_book_service.repository import RepositoryAddNewBookService
 from src.services.delete_inactive_user_service.repository import (
     RepositoryDeleteInactiveUserService,

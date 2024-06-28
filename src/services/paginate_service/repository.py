@@ -1,10 +1,9 @@
-from typing import Sequence
-
+from pydantic import TypeAdapter
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.enums.book import SortChoices
-from src.models.books import Book
-from src.repository.books import Paginate
+from src.repositories.books import Paginate
+from src.response_schemas.books import BookOuts
 from src.services.paginate_service.abc import AbstractPaginateBookService
 
 
@@ -19,8 +18,10 @@ class RepositoryPaginateBookService(AbstractPaginateBookService):
         books_quantity: int = None,
         sort_by: SortChoices = None,
         order_asc: bool = None,
-    ) -> Sequence[Book]:
+    ) -> list[BookOuts]:
         books_on_page = await self.repository.select_books(
             page, books_quantity, sort_by, order_asc
         )
-        return books_on_page.scalars().all()
+        return TypeAdapter(list[BookOuts]).validate_python(
+            books_on_page.scalars().all()
+        )

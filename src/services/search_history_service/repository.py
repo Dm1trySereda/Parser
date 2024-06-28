@@ -1,7 +1,8 @@
+from pydantic import TypeAdapter
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.history import History
-from src.repository.history import SearchHistory
+from src.repositories.history import SearchHistory
+from src.response_schemas.history import HistoryOut
 from src.services.search_history_service.abc import AbstractSearchHistoryService
 
 
@@ -16,8 +17,8 @@ class RepositorySearchHistoryService(AbstractSearchHistoryService):
         book_num: int = None,
         title: str = None,
         author: str = None,
-    ) -> list[History]:
+    ) -> list[HistoryOut]:
         history = await self.repository.select_history(
             book_id=book_id, book_num=book_num, title=title, author=author
         )
-        return history
+        return TypeAdapter(list[HistoryOut]).validate_python(history)

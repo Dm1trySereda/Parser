@@ -1,16 +1,12 @@
-from jinja2 import Environment, FileSystemLoader, select_autoescape
-
+from jinja2 import Environment
 from src.services.render_template_service.abc import AbstractRenderTemplateService
 
 
 class RenderTemplateService(AbstractRenderTemplateService):
+    def __init__(self, env: Environment):
+        self._env = env
 
     async def render_template(self, value: str, template: str):
-        env = Environment(
-            loader=FileSystemLoader("src/templates/"),
-            autoescape=select_autoescape(["html"]),
-        )
-        template = env.get_template(template)
-        email_content = template.render({"recipient_email": value})
-        print(template.render())
-        return email_content
+
+        template = self._env.get_template(template)
+        return template.render({"recipient_email": value})

@@ -1,5 +1,4 @@
-from fastapi import HTTPException, status
-
+from src.custom_exceptions.exseptions import ProvidingParametersError, ResultError
 from src.enums.book import SortChoices
 from src.response_schemas.books import BookOuts
 from src.services.paginate_service.abc import AbstractPaginateBookService
@@ -16,16 +15,9 @@ class PaginationFacade:
         sort_by: SortChoices = None,
         order_asc: bool = None,
     ) -> list[BookOuts]:
-        if not any([page, books_quantity, sort_by, order_asc]):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="You need to specify at least one parameter",
-            )
         page = await self.pagination_services.paginate(
             page, books_quantity, sort_by, order_asc
         )
         if not page:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Page not found"
-            )
-        return [BookOuts.parse_obj(books.__dict__) for books in page]
+            raise ResultError
+        return page

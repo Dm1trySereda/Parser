@@ -1,16 +1,21 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, Query, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from starlette.requests import Request
 
+from src.custom_exceptions.exseptions import (
+    DuplicateError,
+    ProvidingParametersError,
+    ResultError,
+)
 from src.enums.book import SortChoices
 from src.enums.role import UserRoleEnum
 from src.models.users import User
 from src.request_shemas.books import BookIn
 from src.response_schemas.books import BookOuts
+from src.services.authorization_facade import AuthorizationFacade
 from src.services.create_new_book_facade import AddNewBookFacade
 from src.services.create_new_book_service.repository import RepositoryAddNewBookService
-from src.services.authorization_facade import AuthorizationFacade
 from src.services.delete_book_faсade import DeleteBookFacade
 from src.services.delete_book_service.repository import RepositoryDeleteBookService
 from src.services.paginate_facade import PaginationFacade
@@ -55,7 +60,15 @@ async def search_books(
     searcher = BookSearchFacadeServices(
         search_book_service=RepositorySearchBookService(request.state.db)
     )
-    search_result = await searcher.search_book(book_id, book_num, title, author)
+    try:
+        search_result = await searcher.search_book(book_id, book_num, title, author)
+    except ProvidingParametersError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=e.message,
+        )
+    except ResultError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
     return search_result
 
 
@@ -80,8 +93,10 @@ async def get_books_on_page(
     paginator = PaginationFacade(
         pagination_services=RepositoryPaginateBookService(request.state.db)
     )
-    page = await paginator.paginate(page, books_quantity, sort_by, order_asc)
-
+    try:
+        page = await paginator.paginate(page, books_quantity, sort_by, order_asc)
+    except ResultError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
     return page
 
 
@@ -105,7 +120,10 @@ async def add_book(
         inserter_services=RepositoryAddNewBookService(request.state.db),
         history_updater_services=RepositoryUpdateHistoryService(request.state.db),
     )
-    new_book = await book_inserter.add_new_book(new_book)
+    try:
+        new_book = await book_inserter.add_new_book(new_book)
+    except DuplicateError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
     return new_book
 
 
@@ -129,7 +147,10 @@ async def change_book(
         updater_services=RepositoryUpdateBookService(request.state.db),
         history_updater_services=RepositoryUpdateHistoryService(request.state.db),
     )
-    updated_book = await book_updater.update_book(book)
+    try:
+        updated_book = await book_updater.update_book(book)
+    except ResultError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
     return updated_book
 
 
@@ -151,5 +172,13 @@ async def delete_book(
         search_services=RepositorySearchBookService(request.state.db),
         delete_services=RepositoryDeleteBookService(request.state.db),
     )
-    book = await book_deleter.delete_book(book_id, book_num)
+    try:
+        book = await book_deleter.delete_book(book_id, book_num)
+    except ProvidingParametersError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=e.message,
+        )
+    except ResultError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
     return book

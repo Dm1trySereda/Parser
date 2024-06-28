@@ -1,12 +1,12 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, HTTPException, status
 
 from src.config.auth_provider.auth_provider_config import settings_auth
+from src.custom_exceptions.exseptions import RemoteTokenError
 from src.services.auth_provider_registration_user_service.repository import (
     RepositoryAuthProviderRegistrationUserService,
 )
 from src.services.auth_services.repository import RepositoryAuthUserService
 from src.services.authentication_faсade import AuthenticateUserFacade
-from src.services.authorization_facade import AuthorizationFacade
 from src.services.create_token_service.create_local_token import LocalCreateTokenService
 from src.services.generate_otp_code_service.generate import GenerateOTPCodeService
 from src.services.get_remote_token_service.google import GetGoogleTokenService
@@ -49,4 +49,13 @@ async def auth_google(code: str, request: Request):
         ),
         generate_otp_code_service=GenerateOTPCodeService(),
     )
-    return await authenticate_facade.authentication_with_code(code, "Google")
+    try:
+        remote_user_authenticate = await authenticate_facade.authentication_with_code(
+            code, "Google"
+        )
+    except RemoteTokenError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=e.message,
+        )
+    return remote_user_authenticate

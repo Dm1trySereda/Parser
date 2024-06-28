@@ -6,6 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.enums.book import SortChoices
 from src.models import Book
 from src.models.books import Book
+from src.request_shemas.books import BookIn
+from src.response_schemas.books import BookOuts
 
 
 class BaseRepository:
@@ -71,7 +73,7 @@ class InsertBook(BaseRepository):
 
 
 class UpdateBook(BaseRepository):
-    async def update_book(self, existing_book: Book, current_book: dict) -> Book:
+    async def update_book(self, existing_book: BookOuts, current_book: dict) -> Book:
         update_values = {
             "title": current_book.get("title"),
             "author": current_book.get("author"),
@@ -95,16 +97,19 @@ class UpdateBook(BaseRepository):
             .values(**update_values)
         )
         await self.async_session.execute(stmt)
-        return existing_book
+        updated_book = await self.async_session.scalar(
+            select(Book).where(Book.book_num == current_book.get("book_num"))
+        )
+        return updated_book
 
 
 class DeleteBook(BaseRepository):
 
-    async def delete_book(self, current_book: Book, **kwargs) -> Book:
+    async def delete_book(self, existing_book: BookOuts, **kwargs) -> BookOuts:
         query = delete(Book)
         if kwargs.get("book_id"):
             query = query.filter(Book.id == kwargs.get("book_id"))
         if kwargs.get("book_num"):
             query = query.filter(Book.book_num == kwargs.get("book_num"))
         await self.async_session.execute(query)
-        return current_book
+        return existing_book

@@ -1,8 +1,8 @@
 from datetime import timedelta
 
-from fastapi import HTTPException, status
 
 from src.config.auth_provider.auth_provider_config import settings_auth
+from src.custom_exceptions.exseptions import UnauthorizedError, RemoteTokenError
 from src.response_schemas.users import RemoteToken, Token
 from src.services.auth_provider_registration_user_service.abc import (
     AbstractAuthProviderRegistrationUserService,
@@ -48,28 +48,21 @@ class AuthenticateUserFacade:
         )
 
         if not user:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect username or password",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+            raise UnauthorizedError
         access_token_expires = timedelta(
             minutes=settings_auth.ACCESS_TOKEN_EXPIRE_MINUTES
         )
         access_token = await self.create_token_service.create_access_token(
             data={"sub": user.username}, expires_delta=access_token_expires
         )
-        return Token(access_token=access_token, token_type="Bearer")
+        return access_token
 
     async def authentication_with_code(self, code: str, provider: str) -> RemoteToken:
         remote_token = await self.get_remote_token_service.get_token(
             code=code, provider=provider
         )
         if not remote_token:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Received an unexpected status from Google",
-            )
+            raise RemoteTokenError
         user_info = await self.get_user_info_from_remote_service.get_user_info(
             remote_token
         )

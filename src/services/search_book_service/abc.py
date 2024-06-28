@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.models import Book
+from src.response_schemas.books import BookOuts
 
 
 class AbstractSearchBookService(ABC):
@@ -16,5 +16,5 @@ class AbstractSearchBookService(ABC):
         discount: str = None,
         rating: float = None,
         image: str = None,
-    ) -> list[Book]:
+    ) -> list[BookOuts]:
         pass

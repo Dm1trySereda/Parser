@@ -9,18 +9,25 @@ class BaseResponseModel(BaseModel):
     class Config:
         alias_generator = to_camel
         populate_by_name = True
+        from_attributes = True
 
 
 class UserResponse(BaseResponseModel):
-    id: Annotated[int, Field(qe=1)]
-    username: Annotated[str | None, Field(min_length=2)]
-    full_name: Annotated[str | None, Field(min_length=2)]
-    email: Annotated[EmailStr | None, Field(min_length=5)]
-    hashed_password: Annotated[str | None, Field()]
-    created_at: Annotated[datetime, Field(example="2024-05-20T10:00:03")]
-    updated_at: Annotated[datetime, Field(example="2024-05-20T10:00:03")]
-    is_active: Annotated[bool, Field()]
-    role_id: Annotated[int | None, Field()]
+    id: Annotated[int | None, Field(qe=1)] = None
+    username: Annotated[str | None, Field(min_length=2)] = None
+    full_name: Annotated[str | None, Field(min_length=2)] = None
+    email: Annotated[EmailStr | None, Field(min_length=5)] = None
+    hashed_password: Annotated[str | None, Field()] = None
+    created_at: Annotated[datetime | None, Field(example="2024-05-20T10:00:03")] = None
+    updated_at: Annotated[datetime | None, Field(example="2024-05-20T10:00:03")] = None
+    is_active: Annotated[bool, Field()] = None
+    role_id: Annotated[int | None, Field()] = None
+
+
+class RemoteUserInfoResponse(BaseResponseModel):
+    remote_user_id: Annotated[int, Field(qe=1)]
+    full_name: Annotated[str | None, Field(min_length=2)] = None
+    email: Annotated[EmailStr | None, Field(min_length=5)] = None
 
 
 class UserVerifyEmail(BaseResponseModel):

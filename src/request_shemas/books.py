@@ -1,10 +1,8 @@
 import re
-from typing import Annotated, Optional
+from typing import Annotated
 
 from pydantic import BaseModel, Field, HttpUrl, field_validator
-from pydantic.alias_generators import to_camel, to_snake
-
-# from profanity
+from pydantic.alias_generators import to_camel
 
 
 class BaseRequestModel(BaseModel):
@@ -36,3 +34,9 @@ class BookIn(BaseRequestModel):
             raise ValueError("The field contains extra spaces.")
 
         return new_value
+
+
+class ParserBook(BookIn):
+    class Config:
+        alias_generator = False
+        populate_by_name = True

@@ -23,4 +23,4 @@ class LocalCreateTokenService(AbstractCreateTokenService):
         encode_jwt = jwt.encode(
             to_encode, settings_auth.SIGNATURE, algorithm=settings_auth.ALGORITHM
         )
-        return encode_jwt
+        return Token(access_token=encode_jwt, token_type="Bearer")

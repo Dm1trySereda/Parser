@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.repository.users import GetRoleAssociation
+
+from src.repositories.users import GetRoleAssociation
 from src.services.role_association_service.abc import AbstractRoleAssociationService
 
 

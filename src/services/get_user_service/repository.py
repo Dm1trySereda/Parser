@@ -1,8 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.users import User
-from src.repository.users import SearchUser
+from src.repositories.users import SearchUser
+from src.response_schemas.users import UserResponse
 from src.services.get_user_service.abc import AbstractGetUserService
+from pydantic import TypeAdapter
 
 
 class RepositoryGetUserService(AbstractGetUserService):
@@ -15,8 +16,10 @@ class RepositoryGetUserService(AbstractGetUserService):
         email: str = None,
         remote_user_id: int = None,
         username: str = None,
-    ) -> User | None:
+    ) -> UserResponse | None:
         search_user = await self.repository.get_user(
             email=email, remote_user_id=remote_user_id, username=username
         )
-        return search_user.scalar_one_or_none()
+        current_user = search_user.scalar_one_or_none()
+        if current_user:
+            return TypeAdapter(UserResponse).validate_python(current_user)

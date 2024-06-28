@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
-
-from src.models import History
+from src.response_schemas.history import HistoryOut
 
 
 class AbstractSearchHistoryService(ABC):
@@ -11,5 +10,5 @@ class AbstractSearchHistoryService(ABC):
         book_num: int = None,
         title: str = None,
         author: str = None,
-    ) -> list[History]:
+    ) -> list[HistoryOut]:
         pass

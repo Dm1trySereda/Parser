@@ -1,6 +1,6 @@
 import httpx
 
-from src.request_shemas.users import RemoteUserInfoRequest
+from src.response_schemas.users import RemoteUserInfoResponse
 from src.response_schemas.users import RemoteToken
 from src.services.get_user_from_remote_service.abc import (
     AbstractGetUserInfoFromRemoteService,
@@ -9,7 +9,7 @@ from src.services.get_user_from_remote_service.abc import (
 
 class GetGoogleUserInfoService(AbstractGetUserInfoFromRemoteService):
 
-    async def get_user_info(self, remote_token: RemoteToken) -> RemoteUserInfoRequest:
+    async def get_user_info(self, remote_token: RemoteToken) -> RemoteUserInfoResponse:
         access_token = remote_token.access_token
         async with httpx.AsyncClient() as client:
             response = await client.get(
@@ -28,6 +28,6 @@ class GetGoogleUserInfoService(AbstractGetUserInfoFromRemoteService):
             email_value = email_data["value"]
             full_name_data = profile_info["names"][0]
             full_name = full_name_data["displayName"]
-            return RemoteUserInfoRequest(
+            return RemoteUserInfoResponse(
                 remote_user_id=remote_user_id, full_name=full_name, email=email_value
             )

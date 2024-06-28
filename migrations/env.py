@@ -22,9 +22,7 @@ if config.config_file_name is not None:
 # )
 
 # for sync connection
-config.set_main_option(
-    "sqlalchemy.url", setting_db.database_url
-)
+config.set_main_option("sqlalchemy.url", setting_db.database_url)
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel

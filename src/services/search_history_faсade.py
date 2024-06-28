@@ -1,5 +1,9 @@
-from fastapi import HTTPException, status
-
+from src.custom_exceptions.exseptions import (
+    ResultError,
+    BookHistoryError,
+    ProvidingParametersError,
+)
+from src.enums.history import HistorySortChoices
 from src.response_schemas.history import HistoryOut
 from src.services.book_price_alert_service.abc import AbstractBookPriceAlertService
 from src.services.search_history_service.abc import AbstractSearchHistoryService
@@ -29,26 +33,27 @@ class HistorySearchFacadeServices:
                 author,
             ]
         ):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="You need to specify at least one parameter",
-            )
+            raise ProvidingParametersError
         history_search = await self.search_history_service.search(
             book_id,
             book_num,
             title,
             author,
         )
-        if not history_search:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Book not found"
-            )
-        if len(history_search) == 1:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="This book has no story"
-            )
-        return [HistoryOut.parse_obj(books.__dict__) for books in history_search]
+        if not history_search or len(history_search) == 1:
+            raise BookHistoryError
+        return history_search
 
-    async def get_cheap_books(self) -> list[HistoryOut]:
-        cheap_books = await self.book_price_alert.get_price()
-        return [HistoryOut.parse_obj(book.__dict__) for book in cheap_books]
+    async def get_cheap_books(
+        self,
+        page: int = 1,
+        books_quantity: int = 10,
+        sort_by: HistorySortChoices = HistorySortChoices.price,
+        order_asc: bool = True,
+    ) -> list[HistoryOut]:
+        cheap_books = await self.book_price_alert.get_price(
+            page, books_quantity, sort_by, order_asc
+        )
+        if not cheap_books:
+            raise ResultError
+        return cheap_books

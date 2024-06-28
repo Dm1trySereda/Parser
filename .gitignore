@@ -6,4 +6,5 @@
 dump_db_tables
 kubectl
 minikube-linux-amd64
+architecture.txt
 

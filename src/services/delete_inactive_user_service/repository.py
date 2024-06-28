@@ -2,7 +2,7 @@ from datetime import datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.repository.users import DeleteInactiveUser
+from src.repositories.users import DeleteInactiveUser
 from src.services.delete_inactive_user_service.abc import (
     AbstractDeleteInactiveUserService,
 )

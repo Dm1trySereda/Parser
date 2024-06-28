@@ -1,7 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.models.history import History
-from src.repository.history import RepetitiveBook
+
+from src.enums.history import HistorySortChoices
+from src.repositories.history import RepetitiveBook
+from src.response_schemas.history import HistoryOut
 from src.services.book_price_alert_service.abc import AbstractBookPriceAlertService
+from pydantic import TypeAdapter
 
 
 class RepositoryBookPriceAlertService(AbstractBookPriceAlertService):
@@ -9,6 +12,17 @@ class RepositoryBookPriceAlertService(AbstractBookPriceAlertService):
         self.session = session
         self.repository = RepetitiveBook(session)
 
-    async def get_price(self) -> list[History]:
-        books_on_page = await self.repository.select_all_history()
-        return books_on_page
+    async def get_price(
+        self,
+        page: int,
+        books_quantity: int,
+        sort_by: HistorySortChoices,
+        order_asc: bool,
+    ) -> list[HistoryOut]:
+        books_on_page = await self.repository.select_all_history(
+            page,
+            books_quantity,
+            sort_by,
+            order_asc,
+        )
+        return TypeAdapter(list[HistoryOut]).validate_python(books_on_page)

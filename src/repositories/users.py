@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from passlib.context import CryptContext
-from sqlalchemy import delete, select, update, Result
+from sqlalchemy import Result, delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.users import AuthProvider, Role, User
@@ -45,6 +45,8 @@ class CreateNewUser(BaseRepository):
             is_active=is_active,
         )
         self.async_session.add(user)
+        await self.async_session.flush()
+        await self.async_session.refresh(user)
         return user
 
 

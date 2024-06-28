@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 
-from src.request_shemas.users import RemoteUserInfoRequest
+from src.response_schemas.users import RemoteUserInfoResponse
 
 
 class AbstractAuthProviderRegistrationUserService(ABC):
     @abstractmethod
     async def create_new_auth_provider(
-        self, user: RemoteUserInfoRequest, provider: str
+        self, user: RemoteUserInfoResponse, provider: str
     ):
         pass

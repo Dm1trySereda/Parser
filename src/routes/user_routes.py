@@ -1,10 +1,18 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, Request, status
+from fastapi import APIRouter, Depends, Query, Request, status, HTTPException
 from fastapi.security import HTTPBasicCredentials
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from src.config.auth_provider.auth_provider_config import settings_auth
 from src.config.send_mail.send_mail_congif import settings_send_mail
+from src.custom_exceptions.exseptions import (
+    UnauthorizedError,
+    RemoteTokenError,
+    UsernameError,
+    EmailError,
+    OTPCodeError,
+)
 from src.enums.role import UserRoleEnum
 from src.models.users import User
 from src.request_shemas.users import UserRequest
@@ -25,6 +33,7 @@ from src.services.registration_user_faсade import RegistrationUserFacade
 from src.services.registration_user_service.repository import (
     RepositoryRegistrationUserService,
 )
+from src.services.render_template_service.render import RenderTemplateService
 from src.services.send_mail_service.email import SendMailService
 from src.services.update_user_info_service.repository import (
     RepositoryUpdateUserInfoService,
@@ -32,7 +41,6 @@ from src.services.update_user_info_service.repository import (
 from src.services.validate_token_service.repository import (
     RepositoryValidateTokenService,
 )
-from src.services.render_template_service.render import RenderTemplateService
 
 user_routes = APIRouter(tags=["Users"])
 auth_facade = AuthorizationFacade(
@@ -60,7 +68,20 @@ async def login(
         ),
         generate_otp_code_service=GenerateOTPCodeService(),
     )
-    return await authenticate_facade.authentication(form_data)
+    try:
+        user_authentication = await authenticate_facade.authentication(form_data)
+    except UnauthorizedError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=e.message,
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    except RemoteTokenError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=e.message,
+        )
+    return user_authentication
 
 
 @user_routes.post(
@@ -82,10 +103,28 @@ async def registration(request: Request, new_user: Annotated[UserRequest, Depend
         ),
         email_login=settings_send_mail.EMAIL_ADDRESS,
         generate_otp_code_service=GenerateOTPCodeService(),
-        render_template_service=RenderTemplateService(),
+        render_template_service=RenderTemplateService(
+            env=Environment(
+                loader=FileSystemLoader("src/templates/"),
+                autoescape=select_autoescape(["html"]),
+            )
+        ),
     )
+    try:
 
-    return await regis_facade.registration_user(new_user)
+        user_registration = await regis_facade.registration_user(new_user)
+    except UsernameError as e:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=e.message,
+        )
+    except EmailError as e:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=e.message,
+        )
+
+    return user_registration
 
 
 @user_routes.post(
@@ -103,9 +142,16 @@ async def confirmation(
         update_user_info_service=RepositoryUpdateUserInfoService(request.state.db),
         generate_otp_code_service=GenerateOTPCodeService(),
     )
-    await confirmation_facade.verify_email(
-        user_confirmation_code=confirmation_code, recipient_email=user.email
-    )
+    try:
+        await confirmation_facade.verify_email(
+            user_confirmation_code=confirmation_code, recipient_email=user.email
+        )
+    except OTPCodeError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=e.message,
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     return user
 
 

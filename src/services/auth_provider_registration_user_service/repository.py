@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.repository.users import AddAuthProvider
-from src.request_shemas.users import RemoteUserInfoRequest
+from src.repositories.users import AddAuthProvider
+from src.response_schemas.users import RemoteUserInfoResponse
 from src.services.auth_provider_registration_user_service.abc import (
     AbstractAuthProviderRegistrationUserService,
 )
@@ -15,7 +15,7 @@ class RepositoryAuthProviderRegistrationUserService(
         self.repository = AddAuthProvider(session)
 
     async def create_new_auth_provider(
-        self, user: RemoteUserInfoRequest, provider: str
+        self, user: RemoteUserInfoResponse, provider: str
     ):
         await self.repository.create_new_auth_provider(
             user.model_dump(by_alias=False), provider

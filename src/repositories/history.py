@@ -1,11 +1,16 @@
-from sqlalchemy import and_, exists, func, insert, join, select
+from typing import Sequence
 
+from sqlalchemy import and_, exists, func, insert, join, select, asc, desc
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.enums.history import HistorySortChoices
+from src.models import History
 from src.models.books import Book
 from src.models.history import History
 
 
 class BaseRepository:
-    def __init__(self, session):
+    def __init__(self, session: AsyncSession):
         self.async_session = session
 
 
@@ -41,21 +46,39 @@ class SearchHistory(BaseRepository):
 
 
 class RepetitiveBook(BaseRepository):
-    async def select_all_history(self) -> list[History]:
-        subquery = (
-            select(History.book_num)
-            .group_by(History.book_num)
-            .having(func.count(History.book_num) > 1)
+    async def select_all_history(
+        self,
+        page: int,
+        books_quantity: int,
+        sort_by: HistorySortChoices,
+        order_asc: bool,
+    ) -> Sequence[History]:
+        books_quantity = books_quantity or 10
+        books_offset = (page - 1) * books_quantity
+        sort_params = (
+            getattr(History, sort_by.value)
+            if hasattr(History, sort_by.value)
+            else History.price
         )
-        result = await self.async_session.execute(subquery)
+        sort_order = asc(sort_params) if order_asc else desc(sort_params)
+        subquery = (
+            select(History.book_num, func.count().label("count"))
+            .group_by(History.book_num)
+            .having(func.count() > 1)
+        ).subquery()
 
-        duplicate_book_nums = result.scalars().all()
-        duplicated_books = list()
-        for book_num in duplicate_book_nums:
-            query = select(History).where(History.book_num == book_num)
-            result = await self.async_session.execute(query)
-            duplicated_books.extend(result.scalars().all())
-
+        query = select(History)
+        query = (
+            query.join(
+                subquery,
+                History.book_num == subquery.c.book_num,
+            )
+            .limit(books_quantity)
+            .offset(books_offset)
+            .order_by(sort_order)
+        )
+        result = await self.async_session.execute(query)
+        duplicated_books = result.scalars().all()
         return duplicated_books
 
 

@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 
-from src.models import Book
+from src.response_schemas.books import BookOuts
 
 
 class AbstractDeleteBookService(ABC):
     @abstractmethod
     async def delete_book(
-        self, current_book: Book, book_id: int = None, book_num: int = None
-    ) -> Book:
+        self, existing_book: BookOuts, book_id: int = None, book_num: int = None
+    ) -> BookOuts:
         pass
