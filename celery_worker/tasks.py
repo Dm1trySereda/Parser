@@ -25,7 +25,7 @@ parser.conf.timezone = "Europe/Moscow"
 parser.conf.beat_schedule = {
     "run-every-10-minutes": {
         "task": "add_books_group",
-        "schedule": crontab(minute="*/2"),
+        "schedule": crontab(minute="*/10"),
     }
 }
 

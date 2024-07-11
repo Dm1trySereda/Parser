@@ -1,17 +1,17 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, Request, status, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from fastapi.security import HTTPBasicCredentials
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from src.config.auth_provider.auth_provider_config import settings_auth
 from src.config.send_mail.send_mail_congif import settings_send_mail
 from src.custom_exceptions.exseptions import (
-    UnauthorizedError,
-    RemoteTokenError,
-    UsernameError,
     EmailError,
     OTPCodeError,
+    RemoteTokenError,
+    UnauthorizedError,
+    UsernameError,
 )
 from src.enums.role import UserRoleEnum
 from src.models.users import User
@@ -21,7 +21,7 @@ from src.services.auth_provider_registration_user_service.repository import (
     RepositoryAuthProviderRegistrationUserService,
 )
 from src.services.auth_services.repository import RepositoryAuthUserService
-from src.services.authentication_faсade import AuthenticateUserFacade
+from src.services.authentication_facade import AuthenticateUserFacade
 from src.services.authorization_facade import AuthorizationFacade
 from src.services.create_token_service.create_local_token import LocalCreateTokenService
 from src.services.email_verification_facade import EmailVerificationFacade
@@ -29,7 +29,7 @@ from src.services.generate_otp_code_service.generate import GenerateOTPCodeServi
 from src.services.get_remote_token_service.google import GetGoogleTokenService
 from src.services.get_user_from_remote_service.google import GetGoogleUserInfoService
 from src.services.get_user_service.repository import RepositoryGetUserService
-from src.services.registration_user_faсade import RegistrationUserFacade
+from src.services.registration_user_facade import RegistrationUserFacade
 from src.services.registration_user_service.repository import (
     RepositoryRegistrationUserService,
 )

@@ -1,6 +1,6 @@
 from typing import Sequence
 
-from sqlalchemy import and_, exists, func, insert, join, select, asc, desc
+from sqlalchemy import and_, asc, desc, exists, func, insert, join, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.enums.history import HistorySortChoices

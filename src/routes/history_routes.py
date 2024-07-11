@@ -1,12 +1,12 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, status, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from starlette.requests import Request
 
 from src.custom_exceptions.exseptions import (
-    ResultError,
-    ProvidingParametersError,
     BookHistoryError,
+    ProvidingParametersError,
+    ResultError,
 )
 from src.enums.history import HistorySortChoices
 from src.enums.role import UserRoleEnum
@@ -16,7 +16,7 @@ from src.services.authorization_facade import AuthorizationFacade
 from src.services.book_price_alert_service.repository import (
     RepositoryBookPriceAlertService,
 )
-from src.services.search_history_faсade import HistorySearchFacadeServices
+from src.services.search_history_facade import HistorySearchFacadeServices
 from src.services.search_history_service.repository import (
     RepositorySearchHistoryService,
 )

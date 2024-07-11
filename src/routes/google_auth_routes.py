@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, HTTPException, status
+from fastapi import APIRouter, HTTPException, Request, status
 
 from src.config.auth_provider.auth_provider_config import settings_auth
 from src.custom_exceptions.exseptions import RemoteTokenError
@@ -6,7 +6,7 @@ from src.services.auth_provider_registration_user_service.repository import (
     RepositoryAuthProviderRegistrationUserService,
 )
 from src.services.auth_services.repository import RepositoryAuthUserService
-from src.services.authentication_faсade import AuthenticateUserFacade
+from src.services.authentication_facade import AuthenticateUserFacade
 from src.services.create_token_service.create_local_token import LocalCreateTokenService
 from src.services.generate_otp_code_service.generate import GenerateOTPCodeService
 from src.services.get_remote_token_service.google import GetGoogleTokenService

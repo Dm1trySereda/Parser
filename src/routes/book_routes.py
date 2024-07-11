@@ -16,7 +16,7 @@ from src.response_schemas.books import BookOuts
 from src.services.authorization_facade import AuthorizationFacade
 from src.services.create_new_book_facade import AddNewBookFacade
 from src.services.create_new_book_service.repository import RepositoryAddNewBookService
-from src.services.delete_book_faсade import DeleteBookFacade
+from src.services.delete_book_facade import DeleteBookFacade
 from src.services.delete_book_service.repository import RepositoryDeleteBookService
 from src.services.paginate_facade import PaginationFacade
 from src.services.paginate_service.repository import RepositoryPaginateBookService
