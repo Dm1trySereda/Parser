@@ -18,9 +18,16 @@ class RepositoryPaginateBookService(AbstractPaginateBookService):
         books_quantity: int = None,
         sort_by: SortChoices = None,
         order_asc: bool = None,
+        authors: list = None,
+        years: list = None,
     ) -> list[BookOuts]:
         books_on_page = await self.repository.select_books(
-            page, books_quantity, sort_by, order_asc
+            page=page,
+            books_quantity=books_quantity,
+            sort_by=sort_by,
+            order_asc=order_asc,
+            authors=authors,
+            years=years,
         )
         return TypeAdapter(list[BookOuts]).validate_python(
             books_on_page.scalars().all()

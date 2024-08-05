@@ -135,7 +135,7 @@ async def registration(request: Request, new_user: Annotated[UserRequest, Depend
 )
 async def confirmation(
     request: Request,
-    confirmation_code: Annotated[int, Query(qe=4)],
+    code: Annotated[int, Query(qe=4)],
     user: User = Depends(auth_facade.verify_user),
 ):
     confirmation_facade = EmailVerificationFacade(
@@ -144,7 +144,7 @@ async def confirmation(
     )
     try:
         await confirmation_facade.verify_email(
-            user_confirmation_code=confirmation_code, recipient_email=user.email
+            user_confirmation_code=code, recipient_email=user.email
         )
     except OTPCodeError as e:
         raise HTTPException(

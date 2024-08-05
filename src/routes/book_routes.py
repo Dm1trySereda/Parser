@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Optional, List
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from starlette.requests import Request
@@ -12,7 +12,7 @@ from src.enums.book import SortChoices
 from src.enums.role import UserRoleEnum
 from src.models.users import User
 from src.request_shemas.books import BookIn
-from src.response_schemas.books import BookOuts
+from src.response_schemas.books import BookOuts, PopularAuthor, PublishingYear
 from src.services.authorization_facade import AuthorizationFacade
 from src.services.create_new_book_facade import AddNewBookFacade
 from src.services.create_new_book_service.repository import RepositoryAddNewBookService
@@ -45,28 +45,72 @@ auth_facade = AuthorizationFacade(
 )
 async def search_books(
     request: Request,
-    user: User = Depends(
-        auth_facade.get_permissions_checker(
-            roles=[UserRoleEnum.admin, UserRoleEnum.subadmin, UserRoleEnum.client]
-        )
-    ),
     book_id: Annotated[
         int, Query(alias="id", title="Search book for id in db", qe=1)
     ] = None,
     book_num: Annotated[int, Query(title="Search book for num", qe=100)] = None,
     title: Annotated[str, Query(title="Search book for title", min_length=3)] = None,
-    author: Annotated[str, Query(title="Search book for author", min_length=3)] = None,
+    authors: Annotated[Optional[List[str]], Query()] = None,
+    years: Annotated[Optional[List[int]], Query()] = None,
 ):
     searcher = BookSearchFacadeServices(
         search_book_service=RepositorySearchBookService(request.state.db)
     )
+
     try:
-        search_result = await searcher.search_book(book_id, book_num, title, author)
+        search_result = await searcher.search_book(
+            book_id=book_id,
+            book_num=book_num,
+            title=title,
+            authors=authors,
+            years=years,
+        )
+
     except ProvidingParametersError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=e.message,
         )
+    except ResultError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
+    return search_result
+
+
+@book_routers.get(
+    "/books/search/popular-authors",
+    status_code=status.HTTP_200_OK,
+    response_description="Search successful",
+    response_model=list[PopularAuthor],
+)
+async def popular_author(
+    request: Request,
+    count: Annotated[int, Query()] = 10,
+):
+    searcher = BookSearchFacadeServices(
+        search_book_service=RepositorySearchBookService(request.state.db)
+    )
+    try:
+        search_result = await searcher.get_most_popular_authors(count)
+    except ResultError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
+    return search_result
+
+
+@book_routers.get(
+    "/books/search/publishing-years",
+    status_code=status.HTTP_200_OK,
+    response_description="Search successful",
+    response_model=list[PublishingYear],
+)
+async def popular_author(
+    request: Request,
+    count: Annotated[int, Query()] = 10,
+):
+    searcher = BookSearchFacadeServices(
+        search_book_service=RepositorySearchBookService(request.state.db)
+    )
+    try:
+        search_result = await searcher.get_publishing_year(count)
     except ResultError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
     return search_result
@@ -80,21 +124,20 @@ async def search_books(
 )
 async def get_books_on_page(
     request: Request,
-    user: User = Depends(
-        auth_facade.get_permissions_checker(
-            roles=[UserRoleEnum.admin, UserRoleEnum.subadmin, UserRoleEnum.client]
-        )
-    ),
     page: Annotated[int, Query(qe=1)] = 1,
     books_quantity: Annotated[int, Query(qe=10)] = None,
     sort_by: Annotated[SortChoices, Query()] = SortChoices.title,
     order_asc: Annotated[bool, Query()] = False,
+    authors: Annotated[Optional[List[str]], Query()] = None,
+    years: Annotated[Optional[List[int]], Query()] = None,
 ) -> list[BookOuts]:
     paginator = PaginationFacade(
         pagination_services=RepositoryPaginateBookService(request.state.db)
     )
     try:
-        page = await paginator.paginate(page, books_quantity, sort_by, order_asc)
+        page = await paginator.paginate(
+            page, books_quantity, sort_by, order_asc, authors, years
+        )
     except ResultError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
     return page

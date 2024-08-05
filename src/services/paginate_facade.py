@@ -14,9 +14,11 @@ class PaginationFacade:
         books_quantity: int = None,
         sort_by: SortChoices = None,
         order_asc: bool = None,
+        authors: list = None,
+        years: list = None,
     ) -> list[BookOuts]:
         page = await self.pagination_services.paginate(
-            page, books_quantity, sort_by, order_asc
+            page, books_quantity, sort_by, order_asc, authors, years
         )
         if not page:
             raise ResultError

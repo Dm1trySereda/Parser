@@ -12,5 +12,7 @@ class AbstractPaginateBookService(ABC):
         books_quantity: int = None,
         sort_by: SortChoices = None,
         order_asc: bool = None,
+        authors: list = None,
+        years: list = None,
     ) -> list[BookOuts]:
         pass

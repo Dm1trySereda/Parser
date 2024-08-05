@@ -45,9 +45,17 @@ async def parsing_books(page, session):
         )
         book_num = book.get("data-value")
         book_title = book_body.find("h3", class_="product-card__title").text.strip()
-        book_author = book_body.find(
-            "div", class_="product-card__subtitle"
-        ).text.strip()
+        book_author = book_body.find("div", class_="product-card__subtitle").text.split(
+            ","
+        )[0]
+        try:
+            book_year = book_body.find(
+                "div", class_="product-card__subtitle"
+            ).text.split(",")[1]
+        except IndexError:
+            book_year = book_body.find(
+                "div", class_="product-card__subtitle"
+            ).text.split(",")[0]
         book_rating = validation(book_body.find("span", class_="me-1"), is_rating=True)
         book_discount = None
         if book_price_old:
@@ -63,6 +71,7 @@ async def parsing_books(page, session):
             "book_num": book_num,
             "title": book_title,
             "author": book_author,
+            "year": book_year,
             "price_new": book_price_new,
             "price_old": book_price_old,
             "discount": book_discount,
@@ -90,7 +99,5 @@ def validation(value, is_price=False, is_rating=False, is_image=False):
     return None
 
 
-#
-#
 # if __name__ == "__main__":
 #     print(asyncio.run(reading_session(50)))

@@ -23,9 +23,9 @@ from src.services.update_history_service.repository import (
 
 parser.conf.timezone = "Europe/Moscow"
 parser.conf.beat_schedule = {
-    "run-every-10-minutes": {
+    "run-every-30-minutes": {
         "task": "add_books_group",
-        "schedule": crontab(minute="*/10"),
+        "schedule": crontab(minute="*/30"),
     }
 }
 
